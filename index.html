@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizLingo — Learn Business, Playfully</title>
+<meta name="description" content="A Duolingo-style game for learning business terms and concepts, in English, Spanish and Japanese.">
+<meta name="theme-color" content="#58cc02">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BizLingo">
+<style>
+  :root{
+    --green:#58cc02; --green-dark:#46a302; --green-light:#d7ffb8;
+    --blue:#1cb0f6; --blue-dark:#1899d6;
+    --red:#ff4b4b; --red-dark:#ea2b2b; --red-light:#ffdfe0;
+    --gold:#ffc800; --orange:#ff9600;
+    --ink:#3c3c3c; --gray:#777; --line:#e5e5e5; --bg:#f7f7f7;
+    --purple:#ce82ff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  button{font-family:inherit;}
+  #app{max-width:640px; margin:0 auto; min-height:100vh; padding:0 16px 90px;}
+
+  /* ---------- shared ---------- */
+  .btn{
+    display:inline-block; border:none; border-radius:14px; cursor:pointer;
+    font-weight:800; font-size:16px; letter-spacing:.6px; text-transform:uppercase;
+    padding:14px 28px; color:#fff; background:var(--green);
+    box-shadow:0 4px 0 var(--green-dark); transition:filter .1s, transform .05s;
+  }
+  .btn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--green-dark);}
+  .btn:disabled{background:var(--line); box-shadow:0 4px 0 #cfcfcf; color:#aaa; cursor:default;}
+  .btn.blue{background:var(--blue); box-shadow:0 4px 0 var(--blue-dark);}
+  .btn.blue:active{box-shadow:0 1px 0 var(--blue-dark);}
+  .btn.red{background:var(--red); box-shadow:0 4px 0 var(--red-dark);}
+  .btn.ghost{background:#fff; color:var(--blue); border:2px solid var(--line); box-shadow:0 4px 0 var(--line);}
+  .card{background:#fff; border:2px solid var(--line); border-radius:16px; padding:18px;}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 0; position:sticky; top:0; background:var(--bg); z-index:5;
+  }
+  .logo{font-size:24px; font-weight:900; color:var(--green); letter-spacing:-.5px;}
+  .stats{display:flex; gap:14px; align-items:center; font-weight:800; font-size:15px;}
+  .stat{display:flex; align-items:center; gap:4px;}
+  .stat.streak{color:var(--orange);} .stat.xp{color:var(--gold);} .stat.hearts{color:var(--red);}
+  .langbtn{
+    border:2px solid var(--line); background:#fff; border-radius:12px;
+    padding:6px 10px; font-size:18px; cursor:pointer; font-weight:700;
+  }
+
+  /* ---------- language select ---------- */
+  .langselect{text-align:center; padding-top:8vh;}
+  .mascot-big{font-size:84px; line-height:1;}
+  .langselect h1{font-size:30px; margin:14px 0 6px;}
+  .langselect p{color:var(--gray); margin:0 0 26px; font-size:17px;}
+  .langgrid{display:flex; flex-direction:column; gap:12px; max-width:360px; margin:0 auto;}
+  .langopt{
+    display:flex; align-items:center; gap:14px; padding:16px 20px; font-size:19px; font-weight:800;
+    background:#fff; border:2px solid var(--line); border-bottom-width:4px; border-radius:16px; cursor:pointer;
+  }
+  .langopt:hover{background:#f0f9ff; border-color:var(--blue);}
+  .langopt .flag{font-size:30px;}
+
+  /* ---------- home / path ---------- */
+  .unit-banner{
+    border-radius:16px; padding:16px 20px; color:#fff; margin:26px 0 18px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .unit-banner h2{margin:0; font-size:19px;} .unit-banner p{margin:3px 0 0; opacity:.9; font-size:14px;}
+  .unit-banner .unum{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:.85;}
+  .path{display:flex; flex-direction:column; align-items:center; gap:18px; padding:4px 0 8px;}
+  .node-row{width:100%; display:flex; justify-content:center;}
+  .node-row.l{justify-content:flex-start; padding-left:22%;}
+  .node-row.r{justify-content:flex-end; padding-right:22%;}
+  .node{
+    width:76px; height:76px; border-radius:50%; border:none; cursor:pointer;
+    font-size:30px; display:flex; align-items:center; justify-content:center;
+    background:var(--green); box-shadow:0 6px 0 var(--green-dark); color:#fff; position:relative;
+  }
+  .node:active{transform:translateY(4px); box-shadow:0 2px 0 var(--green-dark);}
+  .node.done{background:var(--gold); box-shadow:0 6px 0 #d4a600;}
+  .node.locked{background:#e5e5e5; box-shadow:0 6px 0 #cfcfcf; cursor:default; color:#afafaf;}
+  .node .label{
+    position:absolute; top:84px; left:50%; transform:translateX(-50%);
+    width:130px; text-align:center; font-size:12.5px; font-weight:800; color:var(--gray); pointer-events:none;
+  }
+  .node-row{margin-bottom:26px;}
+  .start-tip{
+    position:absolute; top:-44px; left:50%; transform:translateX(-50%);
+    background:#fff; border:2px solid var(--line); border-radius:10px; color:var(--green);
+    font-size:12px; font-weight:900; padding:6px 12px; text-transform:uppercase; letter-spacing:1px;
+    animation:bob 1s ease-in-out infinite alternate; white-space:nowrap;
+  }
+  @keyframes bob{from{transform:translate(-50%,0)}to{transform:translate(-50%,-6px)}}
+  .ach-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;}
+  .ach{
+    display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--line);
+    border-radius:12px; padding:8px 12px; font-size:13px; font-weight:800; color:var(--gray);
+  }
+  .ach.won{border-color:var(--gold); color:var(--ink); background:#fff9e5;}
+  .ach .ic{font-size:18px; filter:grayscale(1); opacity:.5;}
+  .ach.won .ic{filter:none; opacity:1;}
+  h3.sec{margin:28px 0 10px; font-size:17px;}
+
+  /* ---------- lesson ---------- */
+  .lesson-top{display:flex; align-items:center; gap:14px; padding:16px 0;}
+  .quitx{border:none; background:none; font-size:22px; color:#b5b5b5; cursor:pointer; font-weight:800;}
+  .pbar{flex:1; height:14px; background:#e5e5e5; border-radius:8px; overflow:hidden;}
+  .pbar > div{height:100%; background:var(--green); border-radius:8px; transition:width .4s ease; min-width:0;}
+  .lhearts{font-weight:800; color:var(--red); font-size:16px; display:flex; gap:3px; align-items:center;}
+  .qtype{color:var(--purple); font-weight:900; font-size:13px; text-transform:uppercase; letter-spacing:1px; margin:14px 0 6px;}
+  .qtext{font-size:21px; font-weight:800; margin:0 0 20px; line-height:1.35;}
+  .qtext .blank{
+    display:inline-block; min-width:90px; border-bottom:3px solid #b5b5b5; text-align:center;
+    color:var(--blue); padding:0 6px;
+  }
+  .term{
+    text-decoration:underline dotted 2px; text-decoration-color:var(--blue);
+    text-underline-offset:3px; cursor:help;
+  }
+  .unit-banner .term{text-decoration-color:rgba(255,255,255,.85);}
+  #tooltip{
+    position:fixed; z-index:100; display:none; pointer-events:none;
+    background:#3c3c3c; color:#fff; padding:10px 14px; border-radius:12px;
+    font-size:13.5px; font-weight:600; line-height:1.5; max-width:270px;
+    box-shadow:0 8px 22px rgba(0,0,0,.28);
+  }
+  #tooltip b{color:var(--gold); display:block; margin-bottom:2px;}
+  .opts{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; background:#fff; border:2px solid var(--line); border-bottom-width:4px;
+    border-radius:14px; padding:14px 16px; font-size:16.5px; font-weight:700; cursor:pointer; color:var(--ink);
+  }
+  .opt:hover{background:#fafafa;}
+  .opt.sel{border-color:var(--blue); background:#ddf4ff; color:var(--blue-dark);}
+  .opt.right{border-color:var(--green); background:var(--green-light); color:var(--green-dark);}
+  .opt.wrong{border-color:var(--red); background:var(--red-light); color:var(--red-dark);}
+  .tfrow{display:flex; gap:12px;}
+  .tfrow .opt{flex:1; text-align:center; font-size:18px;}
+
+  .bank{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+  .tile{
+    background:#fff; border:2px solid var(--line); border-bottom-width:4px; border-radius:12px;
+    padding:10px 16px; font-size:16px; font-weight:800; cursor:pointer;
+  }
+  .tile.used{opacity:.35; cursor:default;}
+
+  .matchgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .mitem{
+    background:#fff; border:2px solid var(--line); border-bottom-width:4px; border-radius:12px;
+    padding:13px 12px; font-size:14.5px; font-weight:700; cursor:pointer; text-align:center;
+  }
+  .mitem.sel{border-color:var(--blue); background:#ddf4ff;}
+  .mitem.done{border-color:var(--line); background:#f3f3f3; color:#bbb; cursor:default;}
+  .mitem.shake{animation:shake .35s; border-color:var(--red); background:var(--red-light);}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  .footerbar{
+    position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:2px solid var(--line);
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom)); z-index:10;
+  }
+  .footerbar .inner{max-width:640px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px;}
+  .footerbar.good{background:var(--green-light); border-color:var(--green-light);}
+  .footerbar.bad{background:var(--red-light); border-color:var(--red-light);}
+  .fb-msg{font-weight:900; font-size:17px;}
+  .fb-msg.good{color:var(--green-dark);} .fb-msg.bad{color:var(--red-dark);}
+  .fb-sub{font-size:14px; font-weight:600; margin-top:3px; color:var(--ink); opacity:.85;}
+
+  /* ---------- complete ---------- */
+  .complete{text-align:center; padding-top:9vh; position:relative;}
+  .complete h1{font-size:30px; margin:10px 0 4px; color:var(--gold);}
+  .complete p{color:var(--gray); font-size:17px; margin:0 0 26px;}
+  .scorecards{display:flex; gap:12px; justify-content:center; margin-bottom:30px;}
+  .scorecard{
+    border:2px solid; border-radius:16px; min-width:120px; overflow:hidden; background:#fff;
+  }
+  .scorecard .top{color:#fff; font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:6px;}
+  .scorecard .val{font-size:24px; font-weight:900; padding:12px 8px;}
+  .sc-xp{border-color:var(--gold);} .sc-xp .top{background:var(--gold);} .sc-xp .val{color:var(--gold);}
+  .sc-acc{border-color:var(--green);} .sc-acc .top{background:var(--green);} .sc-acc .val{color:var(--green);}
+
+  .confetti{position:fixed; top:-12px; pointer-events:none; z-index:50; font-size:0;}
+  .confetti i{display:block; width:10px; height:14px; border-radius:2px; animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg); opacity:.6;}}
+
+  .toast{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:60;
+    background:#fff; border:2px solid var(--gold); border-radius:14px; padding:12px 20px;
+    font-weight:800; box-shadow:0 6px 18px rgba(0,0,0,.12); animation:toastin .3s ease;
+    display:flex; gap:10px; align-items:center;
+  }
+  @keyframes toastin{from{transform:translate(-50%,-30px); opacity:0;}to{transform:translate(-50%,0); opacity:1;}}
+
+  .modal-back{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .modal{background:#fff; border-radius:20px; padding:28px; max-width:380px; text-align:center;}
+  .modal h2{margin:8px 0 8px;} .modal p{color:var(--gray); margin:0 0 20px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+
+/* ================= i18n UI strings ================= */
+const I18N = {
+en:{
+  name:"English", flag:"🇺🇸",
+  tagline:"Learn business the fun way", choose:"I want to learn in…",
+  welcome:"Hi! I'm Bizzy. Let's turn you into an entrepreneur — one lesson at a time.",
+  start:"Start", continueBtn:"Continue", check:"Check", lesson:"Lesson", unit:"Unit",
+  correct:"Nice! Correct!", correctAlts:["Excellent!","You've got the business brain!","Nailed it!","Spot on!"],
+  wrong:"Not quite.", answerWas:"Correct answer:", tryLater:"You'll see this one again.",
+  done:"Lesson complete!", perfect:"PERFECT lesson! +5 bonus XP", earned:"XP earned", accuracy:"Accuracy",
+  home:"Back to path", quitTitle:"Leave the lesson?", quitBody:"Your progress in this lesson will be lost.",
+  stay:"Keep learning", leave:"Leave", noHearts:"You're out of hearts!",
+  noHeartsBody:"Hearts refill every day. Tip: replaying a completed (gold) lesson is practice mode — no hearts needed!",
+  ok:"Got it", practice:"Practice mode — no hearts at risk!", typeMC:"Select the correct answer",
+  typeTF:"True or false?", typeFIB:"Tap the word that completes the sentence", typeMATCH:"Match the pairs",
+  trueW:"True", falseW:"False", achievements:"Achievements", startHere:"Start",
+  ach:{first:"First Steps — complete your first lesson", perfect:"Flawless — finish a lesson with no mistakes",
+       unit:"Unit Champion — complete a whole unit", xp100:"Centurion — earn 100 XP", streak3:"On Fire — 3-day streak"},
+  achUnlocked:"Achievement unlocked!",
+  dayStreak:"day streak",
+},
+es:{
+  name:"Español", flag:"🇪🇸",
+  tagline:"Aprende negocios de forma divertida", choose:"Quiero aprender en…",
+  welcome:"¡Hola! Soy Bizzy. Vamos a convertirte en emprendedor — una lección a la vez.",
+  start:"Empezar", continueBtn:"Continuar", check:"Comprobar", lesson:"Lección", unit:"Unidad",
+  correct:"¡Muy bien! ¡Correcto!", correctAlts:["¡Excelente!","¡Tienes mente de negocios!","¡Perfecto!","¡Exacto!"],
+  wrong:"No exactamente.", answerWas:"Respuesta correcta:", tryLater:"Volverás a ver esta pregunta.",
+  done:"¡Lección completada!", perfect:"¡Lección PERFECTA! +5 XP extra", earned:"XP ganados", accuracy:"Precisión",
+  home:"Volver al camino", quitTitle:"¿Salir de la lección?", quitBody:"Perderás tu progreso en esta lección.",
+  stay:"Seguir aprendiendo", leave:"Salir", noHearts:"¡Te quedaste sin corazones!",
+  noHeartsBody:"Los corazones se recargan cada día. Consejo: repetir una lección completada (dorada) es modo práctica — ¡sin corazones!",
+  ok:"Entendido", practice:"Modo práctica — ¡sin riesgo de corazones!", typeMC:"Selecciona la respuesta correcta",
+  typeTF:"¿Verdadero o falso?", typeFIB:"Toca la palabra que completa la frase", typeMATCH:"Une las parejas",
+  trueW:"Verdadero", falseW:"Falso", achievements:"Logros", startHere:"Empieza",
+  ach:{first:"Primeros pasos — completa tu primera lección", perfect:"Impecable — termina una lección sin errores",
+       unit:"Campeón de unidad — completa una unidad entera", xp100:"Centurión — gana 100 XP", streak3:"En llamas — racha de 3 días"},
+  achUnlocked:"¡Logro desbloqueado!",
+  dayStreak:"días de racha",
+},
+ja:{
+  name:"日本語", flag:"🇯🇵",
+  tagline:"楽しくビジネスを学ぼう", choose:"学習する言語を選んでください…",
+  welcome:"こんにちは！ビジーだよ。1レッスンずつ、君を起業家にしていこう！",
+  start:"スタート", continueBtn:"続ける", check:"チェック", lesson:"レッスン", unit:"ユニット",
+  correct:"やったね！正解！", correctAlts:["すばらしい！","ビジネスの才能あり！","お見事！","その通り！"],
+  wrong:"おしい！", answerWas:"正解：", tryLater:"この問題はあとでもう一度出てくるよ。",
+  done:"レッスン完了！", perfect:"パーフェクト！ボーナス +5 XP", earned:"獲得XP", accuracy:"正答率",
+  home:"マップに戻る", quitTitle:"レッスンをやめますか？", quitBody:"このレッスンの進捗は失われます。",
+  stay:"学習を続ける", leave:"やめる", noHearts:"ハートがなくなった！",
+  noHeartsBody:"ハートは毎日回復します。ヒント：クリア済み（金色）のレッスンは練習モードなので、ハートは減りません！",
+  ok:"わかった", practice:"練習モード — ハートは減りません！", typeMC:"正しい答えを選ぼう",
+  typeTF:"○か×か？", typeFIB:"文を完成させる言葉をタップしよう", typeMATCH:"ペアを選ぼう",
+  trueW:"正しい", falseW:"間違い", achievements:"実績", startHere:"スタート",
+  ach:{first:"はじめの一歩 — 最初のレッスンを完了", perfect:"完璧 — ノーミスでレッスンを完了",
+       unit:"ユニット制覇 — ユニットを全部完了", xp100:"百人隊長 — 100 XPを獲得", streak3:"絶好調 — 3日連続で学習"},
+  achUnlocked:"実績を達成！",
+  dayStreak:"日連続",
+},
+};
+
+/* ================= Course content =================
+   Question types:
+   mc    {t,q,c(orrect),w(rong[3]),exp}
+   tf    {t,q,a(bool),exp}
+   fib   {t,q(with ___),bank[],a,exp}
+   match {t,pairs[[l,r]x4]}
+*/
+const CONTENT = {
+/* ---------------- ENGLISH ---------------- */
+en:[
+{ title:"Business Basics", desc:"Revenue, profit and the language of money", color:"#58cc02", icon:"💼",
+  lessons:[
+  { name:"Money In, Money Out", icon:"💵", qs:[
+    {t:"mc", q:'What is "revenue"?', c:"The total money a business earns from sales",
+      w:["The money left after paying expenses","Money borrowed from a bank","Money invested by the founders"],
+      exp:"Revenue is the top line — everything you earn before any costs are subtracted."},
+    {t:"fib", q:"Profit = Revenue − ___", bank:["Expenses","Assets","Customers","Ideas"], a:"Expenses",
+      exp:"Profit is what remains after subtracting all expenses from revenue."},
+    {t:"tf", q:"A business can have high revenue and still lose money.", a:true,
+      exp:"True — if expenses are higher than revenue, the business loses money."},
+    {t:"match", pairs:[["Revenue","Money earned from sales"],["Expense","Money spent to operate"],
+      ["Profit","Revenue minus expenses"],["Loss","When expenses exceed revenue"]]},
+  ]},
+  { name:"Cash is King", icon:"👑", qs:[
+    {t:"mc", q:'What is "cash flow"?', c:"The movement of money in and out of a business",
+      w:["The total value of a company","A type of bank account","The salary paid to employees"],
+      exp:"Cash flow tracks when money actually enters and leaves your business."},
+    {t:"tf", q:"A profitable company can never run out of cash.", a:false,
+      exp:"False — if customers pay late while bills are due now, even profitable companies can run dry."},
+    {t:"fib", q:"The ___ point is where total revenue equals total costs.", bank:["break-even","pivot","equity","branding"], a:"break-even",
+      exp:"At break-even you make no profit and no loss — every sale after it earns profit."},
+    {t:"mc", q:"Which of these is a fixed cost?", c:"Monthly office rent",
+      w:["Raw materials for each product","Shipping for each order","Sales commissions"],
+      exp:"Fixed costs stay the same no matter how much you sell. Rent is due regardless."},
+  ]},
+  { name:"Customers & Value", icon:"🎯", qs:[
+    {t:"mc", q:'What is a "target market"?', c:"The specific group of people most likely to buy your product",
+      w:["Every person in the world","The store where you sell","Your list of competitors"],
+      exp:"Trying to sell to everyone usually means selling to no one. Focus wins."},
+    {t:"fib", q:"A ___ proposition explains why customers should choose you.", bank:["value","tax","supply","legal"], a:"value",
+      exp:"Your value proposition is the promise of what makes your offer worth buying."},
+    {t:"match", pairs:[["B2B","Selling to other businesses"],["B2C","Selling to consumers"],
+      ["Niche","A small, specialized market"],["Demand","How much customers want a product"]]},
+    {t:"tf", q:"A niche market is always a bad choice because it is small.", a:false,
+      exp:"False — niches often mean less competition and more loyal customers."},
+  ]},
+]},
+{ title:"Marketing & Sales", desc:"Win customers and keep them coming back", color:"#1cb0f6", icon:"📣",
+  lessons:[
+  { name:"Know Your Brand", icon:"✨", qs:[
+    {t:"mc", q:'What is "branding"?', c:"The identity and personality of your business",
+      w:["Printing labels on products","A type of advertisement","The legal name registration"],
+      exp:"Your brand is how people feel about your business — beyond just a logo."},
+    {t:"tf", q:"A logo is the only part of a brand.", a:false,
+      exp:"False — brand includes your voice, values, design, and customer experience."},
+    {t:"fib", q:"Word-of-___ marketing happens when customers recommend you to others.", bank:["mouth","paper","wallet","office"], a:"mouth",
+      exp:"Word-of-mouth is free and powerful — happy customers become your marketers."},
+    {t:"mc", q:'What is a "unique selling point" (USP)?', c:"What makes your product different from competitors",
+      w:["The lowest possible price","The store with the most products","A one-time discount"],
+      exp:"Your USP answers the customer's question: why buy from YOU?"},
+  ]},
+  { name:"Winning Customers", icon:"🏆", qs:[
+    {t:"mc", q:'What does "CAC" stand for?', c:"Customer Acquisition Cost — the money spent to win one new customer",
+      w:["Company Annual Capital","Corporate Accounting Code","Customer Average Cart"],
+      exp:"If you spend $100 on ads to get 10 customers, your CAC is $10."},
+    {t:"fib", q:"Customer ___ measures how many customers keep coming back.", bank:["retention","taxation","insurance","inflation"], a:"retention",
+      exp:"High retention means customers stay loyal — usually cheaper than finding new ones."},
+    {t:"match", pairs:[["Lead","A potential customer"],["Conversion","Turning a lead into a buyer"],
+      ["Churn","Customers who stop buying"],["Loyalty","Customers who keep returning"]]},
+    {t:"tf", q:"It usually costs less to keep an existing customer than to find a new one.", a:true,
+      exp:"True — acquiring a new customer can cost 5x more than retaining one."},
+  ]},
+  { name:"The Sales Funnel", icon:"🌪️", qs:[
+    {t:"fib", q:"The sales ___ shows the customer journey from awareness to purchase.", bank:["funnel","ladder","bridge","wallet"], a:"funnel",
+      exp:"It's called a funnel because many people enter at the top, fewer buy at the bottom."},
+    {t:"mc", q:"What is usually the FIRST stage of a sales funnel?", c:"Awareness — people discover you exist",
+      w:["Purchase — people buy","Loyalty — people return","Refund — people return products"],
+      exp:"Before anyone can buy, they need to know you exist."},
+    {t:"tf", q:"Every person who hears about your product will buy it.", a:false,
+      exp:"False — only a fraction converts at each stage. That's why the funnel narrows."},
+    {t:"mc", q:'What is an "upsell"?', c:"Encouraging a customer to buy a bigger or better option",
+      w:["Selling a product at a loss","Closing the store early","Refusing small orders"],
+      exp:'"Would you like a large for $1 more?" — that\'s an upsell.'},
+  ]},
+]},
+{ title:"Money & Finance", desc:"Assets, margins and funding your dream", color:"#ce82ff", icon:"🏦",
+  lessons:[
+  { name:"The Balance Sheet", icon:"⚖️", qs:[
+    {t:"match", pairs:[["Asset","Something valuable the business owns"],["Liability","Money the business owes"],
+      ["Equity","The owners' share of the business"],["Debt","Borrowed money that must be repaid"]]},
+    {t:"mc", q:"Which of these is an ASSET?", c:"A delivery van owned by the company",
+      w:["An unpaid supplier invoice","A bank loan to repay","Next month's rent bill"],
+      exp:"Assets are things of value you own — vehicles, cash, equipment, inventory."},
+    {t:"tf", q:"A bank loan is an asset for the business that receives it.", a:false,
+      exp:"False — a loan must be repaid, so it's a liability. The cash received is the asset."},
+    {t:"fib", q:"The accounting equation: Assets = Liabilities + ___", bank:["Equity","Revenue","Marketing","Inventory"], a:"Equity",
+      exp:"This equation is the foundation of every balance sheet."},
+  ]},
+  { name:"Margins & Returns", icon:"📈", qs:[
+    {t:"mc", q:'What is a "profit margin"?', c:"The percentage of revenue you keep as profit",
+      w:["The space at the edge of an invoice","The total number of sales","The price of your cheapest product"],
+      exp:"Margin = profit ÷ revenue. It shows how efficiently you turn sales into profit."},
+    {t:"fib", q:"ROI stands for Return On ___", bank:["Investment","Internet","Inventory","Income"], a:"Investment",
+      exp:"ROI measures how much you gain compared to what you put in."},
+    {t:"tf", q:"A 10% profit margin means you keep $10 of every $100 in sales.", a:true,
+      exp:"True — margin is profit expressed as a percentage of revenue."},
+    {t:"mc", q:"You buy a product for $50 and sell it for $80. What is your gross profit?", c:"$30",
+      w:["$80","$50","$130"],
+      exp:"Gross profit = selling price − cost = $80 − $50 = $30."},
+  ]},
+  { name:"Funding Your Dream", icon:"🚀", qs:[
+    {t:"mc", q:'What does "bootstrapping" mean?', c:"Funding your business with your own money and its revenues",
+      w:["Hiring your first employee","Copying a competitor's idea","Closing the business"],
+      exp:"Bootstrappers grow without outside investors — keeping full control."},
+    {t:"match", pairs:[["Investor","Gives money for a share of the business"],["Loan","Borrowed money repaid with interest"],
+      ["Crowdfunding","Many small contributions, often online"],["Grant","Money you don't have to repay"]]},
+    {t:"fib", q:"Giving investors shares means giving up some ___ in your company.", bank:["equity","furniture","customers","branding"], a:"equity",
+      exp:"Investment money isn't free — you trade ownership (equity) for capital."},
+    {t:"tf", q:"Venture capital investors usually expect fast growth.", a:true,
+      exp:"True — VCs bet on startups that can grow very big, very fast."},
+  ]},
+]},
+{ title:"Strategy & Growth", desc:"Think like a founder, grow like a pro", color:"#ff9600", icon:"🧭",
+  lessons:[
+  { name:"Plan to Win", icon:"🗺️", qs:[
+    {t:"mc", q:'A "business model" describes…', c:"How a business creates value and makes money",
+      w:["The building where you work","A famous entrepreneur","A government license"],
+      exp:"Your business model answers: who do you serve, what do you offer, how do you earn?"},
+    {t:"fib", q:"MVP stands for Minimum ___ Product.", bank:["Viable","Valuable","Visible","Virtual"], a:"Viable",
+      exp:"An MVP is the simplest version that lets you test your idea with real customers."},
+    {t:"tf", q:"An MVP should include every feature you can imagine.", a:false,
+      exp:"False — the whole point is to launch small, learn fast, and improve."},
+    {t:"mc", q:'What is a "competitive advantage"?', c:"Something that lets you consistently outperform rivals",
+      w:["Having the biggest office","Working the longest hours","Having the most meetings"],
+      exp:"It could be lower costs, better technology, a stronger brand, or unique know-how."},
+  ]},
+  { name:"Adapt & Grow", icon:"🌱", qs:[
+    {t:"mc", q:'In a startup, what is a "pivot"?', c:"A significant change in strategy based on what you've learned",
+      w:["A type of office chair","Firing all employees","Doubling all prices"],
+      exp:"Instagram pivoted from a check-in app to photos. Pivoting is learning, not failing."},
+    {t:"fib", q:"A business is ___ if it can grow revenue without costs growing as fast.", bank:["scalable","expensive","seasonal","offline"], a:"scalable",
+      exp:"Software is highly scalable: one more user costs almost nothing to serve."},
+    {t:"match", pairs:[["Pivot","Change direction based on learning"],["Scale","Grow efficiently"],
+      ["Milestone","A key progress goal"],["KPI","A number that tracks performance"]]},
+    {t:"tf", q:"A SMART goal is Specific, Measurable, Achievable, Relevant and Time-bound.", a:true,
+      exp:'True — "get 100 paying customers by June" beats "do better".'},
+  ]},
+  { name:"The Founder Mindset", icon:"🧠", qs:[
+    {t:"mc", q:'What is an "entrepreneur"?', c:"Someone who starts and runs a business, taking on risk",
+      w:["Someone who only invests in stocks","Any person with a job","A government official"],
+      exp:"Entrepreneurs spot opportunities and accept risk to build something new."},
+    {t:"tf", q:"Failure always means an entrepreneur should give up.", a:false,
+      exp:"False — most successful founders failed first. Each failure teaches what doesn't work."},
+    {t:"fib", q:"A short, persuasive description of your business is an elevator ___.", bank:["pitch","button","ride","door"], a:"pitch",
+      exp:"If you can't explain your idea in 30 seconds, keep refining it."},
+    {t:"mc", q:'"Networking" means…', c:"Building professional relationships that can help your business",
+      w:["Installing internet cables","Watching TV shows","Avoiding other founders"],
+      exp:"Your network brings advice, customers, partners, and investors."},
+  ]},
+]},
+],
+/* ---------------- SPANISH ---------------- */
+es:[
+{ title:"Fundamentos de Negocio", desc:"Ingresos, ganancias y el idioma del dinero", color:"#58cc02", icon:"💼",
+  lessons:[
+  { name:"Dinero que entra, dinero que sale", icon:"💵", qs:[
+    {t:"mc", q:'¿Qué son los "ingresos" (revenue)?', c:"El dinero total que un negocio gana por sus ventas",
+      w:["El dinero que queda después de pagar gastos","Dinero prestado por un banco","Dinero invertido por los fundadores"],
+      exp:"Los ingresos son la primera línea: todo lo que ganas antes de restar costos."},
+    {t:"fib", q:"Ganancia = Ingresos − ___", bank:["Gastos","Activos","Clientes","Ideas"], a:"Gastos",
+      exp:"La ganancia es lo que queda después de restar todos los gastos a los ingresos."},
+    {t:"tf", q:"Un negocio puede tener ingresos altos y aun así perder dinero.", a:true,
+      exp:"Verdadero — si los gastos superan los ingresos, el negocio pierde dinero."},
+    {t:"match", pairs:[["Ingresos","Dinero ganado por ventas"],["Gasto","Dinero usado para operar"],
+      ["Ganancia","Ingresos menos gastos"],["Pérdida","Cuando los gastos superan los ingresos"]]},
+  ]},
+  { name:"El efectivo es el rey", icon:"👑", qs:[
+    {t:"mc", q:'¿Qué es el "flujo de caja"?', c:"El movimiento de dinero que entra y sale del negocio",
+      w:["El valor total de una empresa","Un tipo de cuenta bancaria","El salario de los empleados"],
+      exp:"El flujo de caja registra cuándo el dinero realmente entra y sale de tu negocio."},
+    {t:"tf", q:"Una empresa rentable nunca puede quedarse sin efectivo.", a:false,
+      exp:"Falso — si los clientes pagan tarde y las facturas vencen ahora, hasta las empresas rentables pueden quedarse sin caja."},
+    {t:"fib", q:"El punto de ___ es donde los ingresos totales igualan los costos totales.", bank:["equilibrio","pivote","capital","marca"], a:"equilibrio",
+      exp:"En el punto de equilibrio no ganas ni pierdes — cada venta posterior genera ganancia."},
+    {t:"mc", q:"¿Cuál de estos es un costo fijo?", c:"La renta mensual de la oficina",
+      w:["Materia prima de cada producto","Envío de cada pedido","Comisiones de venta"],
+      exp:"Los costos fijos no cambian sin importar cuánto vendas. La renta se paga igual."},
+  ]},
+  { name:"Clientes y valor", icon:"🎯", qs:[
+    {t:"mc", q:'¿Qué es un "mercado objetivo"?', c:"El grupo específico de personas con más probabilidad de comprar tu producto",
+      w:["Todas las personas del mundo","La tienda donde vendes","Tu lista de competidores"],
+      exp:"Intentar venderle a todos suele significar no venderle a nadie. El enfoque gana."},
+    {t:"fib", q:"La propuesta de ___ explica por qué los clientes deben elegirte.", bank:["valor","impuestos","oferta","ley"], a:"valor",
+      exp:"Tu propuesta de valor es la promesa de lo que hace que tu oferta valga la pena."},
+    {t:"match", pairs:[["B2B","Vender a otras empresas"],["B2C","Vender a consumidores"],
+      ["Nicho","Un mercado pequeño y especializado"],["Demanda","Cuánto quieren los clientes un producto"]]},
+    {t:"tf", q:"Un nicho de mercado siempre es mala opción porque es pequeño.", a:false,
+      exp:"Falso — los nichos suelen tener menos competencia y clientes más fieles."},
+  ]},
+]},
+{ title:"Marketing y Ventas", desc:"Gana clientes y haz que vuelvan", color:"#1cb0f6", icon:"📣",
+  lessons:[
+  { name:"Conoce tu marca", icon:"✨", qs:[
+    {t:"mc", q:'¿Qué es el "branding"?', c:"La identidad y personalidad de tu negocio",
+      w:["Imprimir etiquetas en productos","Un tipo de anuncio","El registro legal del nombre"],
+      exp:"Tu marca es lo que la gente siente sobre tu negocio — mucho más que un logo."},
+    {t:"tf", q:"El logo es la única parte de una marca.", a:false,
+      exp:"Falso — la marca incluye tu voz, valores, diseño y la experiencia del cliente."},
+    {t:"fib", q:"El marketing de boca a ___ ocurre cuando los clientes te recomiendan.", bank:["boca","papel","cartera","oficina"], a:"boca",
+      exp:"El boca a boca es gratis y poderoso — los clientes felices se vuelven tus vendedores."},
+    {t:"mc", q:'¿Qué es una "propuesta única de venta" (USP)?', c:"Lo que hace a tu producto diferente de la competencia",
+      w:["El precio más bajo posible","La tienda con más productos","Un descuento único"],
+      exp:"Tu USP responde la pregunta del cliente: ¿por qué comprarte a TI?"},
+  ]},
+  { name:"Ganar clientes", icon:"🏆", qs:[
+    {t:"mc", q:'¿Qué significa "CAC"?', c:"Costo de Adquisición de Cliente — lo que gastas para ganar un cliente nuevo",
+      w:["Capital Anual Corporativo","Código de Cuentas Corporativas","Carrito Promedio del Cliente"],
+      exp:"Si gastas $100 en anuncios y consigues 10 clientes, tu CAC es $10."},
+    {t:"fib", q:"La ___ de clientes mide cuántos clientes siguen volviendo.", bank:["retención","tributación","inflación","logística"], a:"retención",
+      exp:"Alta retención significa clientes fieles — suele ser más barato que conseguir nuevos."},
+    {t:"match", pairs:[["Lead","Un cliente potencial"],["Conversión","Convertir un interesado en comprador"],
+      ["Churn","Clientes que dejan de comprar"],["Lealtad","Clientes que siguen regresando"]]},
+    {t:"tf", q:"Normalmente cuesta menos mantener un cliente que conseguir uno nuevo.", a:true,
+      exp:"Verdadero — adquirir un cliente nuevo puede costar 5 veces más que retener uno."},
+  ]},
+  { name:"El embudo de ventas", icon:"🌪️", qs:[
+    {t:"fib", q:"El ___ de ventas muestra el camino del cliente desde el descubrimiento hasta la compra.", bank:["embudo","puente","muro","cajón"], a:"embudo",
+      exp:"Se llama embudo porque muchos entran arriba y pocos compran abajo."},
+    {t:"mc", q:"¿Cuál suele ser la PRIMERA etapa del embudo de ventas?", c:"Conocimiento — la gente descubre que existes",
+      w:["Compra — la gente compra","Lealtad — la gente regresa","Devolución — la gente devuelve productos"],
+      exp:"Antes de que alguien compre, necesita saber que existes."},
+    {t:"tf", q:"Toda persona que escucha de tu producto lo comprará.", a:false,
+      exp:"Falso — solo una fracción avanza en cada etapa. Por eso el embudo se estrecha."},
+    {t:"mc", q:'¿Qué es un "upsell"?', c:"Animar al cliente a comprar una opción más grande o mejor",
+      w:["Vender un producto con pérdida","Cerrar la tienda temprano","Rechazar pedidos pequeños"],
+      exp:'"¿Quieres el grande por $1 más?" — eso es un upsell.'},
+  ]},
+]},
+{ title:"Dinero y Finanzas", desc:"Activos, márgenes y cómo financiar tu sueño", color:"#ce82ff", icon:"🏦",
+  lessons:[
+  { name:"El balance general", icon:"⚖️", qs:[
+    {t:"match", pairs:[["Activo","Algo de valor que el negocio posee"],["Pasivo","Dinero que el negocio debe"],
+      ["Capital","La parte de los dueños en el negocio"],["Deuda","Dinero prestado que hay que devolver"]]},
+    {t:"mc", q:"¿Cuál de estos es un ACTIVO?", c:"Una camioneta de reparto propiedad de la empresa",
+      w:["Una factura de proveedor sin pagar","Un préstamo bancario por devolver","La renta del próximo mes"],
+      exp:"Los activos son cosas de valor que posees — vehículos, efectivo, equipo, inventario."},
+    {t:"tf", q:"Un préstamo bancario es un activo para el negocio que lo recibe.", a:false,
+      exp:"Falso — un préstamo debe devolverse, así que es un pasivo. El efectivo recibido es el activo."},
+    {t:"fib", q:"La ecuación contable: Activos = Pasivos + ___", bank:["Capital","Ingresos","Marketing","Inventario"], a:"Capital",
+      exp:"Esta ecuación es la base de todo balance general."},
+  ]},
+  { name:"Márgenes y retornos", icon:"📈", qs:[
+    {t:"mc", q:'¿Qué es el "margen de ganancia"?', c:"El porcentaje de los ingresos que conservas como ganancia",
+      w:["El espacio al borde de una factura","El número total de ventas","El precio de tu producto más barato"],
+      exp:"Margen = ganancia ÷ ingresos. Muestra qué tan bien conviertes ventas en ganancia."},
+    {t:"fib", q:"ROI significa Retorno de la ___", bank:["Inversión","Internet","Inventario","Industria"], a:"Inversión",
+      exp:"El ROI mide cuánto ganas comparado con lo que invertiste."},
+    {t:"tf", q:"Un margen del 10% significa que conservas $10 de cada $100 en ventas.", a:true,
+      exp:"Verdadero — el margen es la ganancia expresada como porcentaje de los ingresos."},
+    {t:"mc", q:"Compras un producto por $50 y lo vendes por $80. ¿Cuál es tu ganancia bruta?", c:"$30",
+      w:["$80","$50","$130"],
+      exp:"Ganancia bruta = precio de venta − costo = $80 − $50 = $30."},
+  ]},
+  { name:"Financia tu sueño", icon:"🚀", qs:[
+    {t:"mc", q:'¿Qué significa "bootstrapping"?', c:"Financiar tu negocio con tu propio dinero y sus ingresos",
+      w:["Contratar a tu primer empleado","Copiar la idea de un competidor","Cerrar el negocio"],
+      exp:"Quien hace bootstrapping crece sin inversionistas externos — y conserva el control total."},
+    {t:"match", pairs:[["Inversionista","Da dinero a cambio de una parte del negocio"],["Préstamo","Dinero prestado que se devuelve con intereses"],
+      ["Crowdfunding","Muchas aportaciones pequeñas, normalmente en línea"],["Subvención","Dinero que no tienes que devolver"]]},
+    {t:"fib", q:"Dar acciones a inversionistas significa ceder parte del ___ de tu empresa.", bank:["capital","mobiliario","cliente","logo"], a:"capital",
+      exp:"El dinero de inversión no es gratis — intercambias propiedad (capital) por financiamiento."},
+    {t:"tf", q:"Los inversionistas de capital de riesgo suelen esperar crecimiento rápido.", a:true,
+      exp:"Verdadero — los VC apuestan por startups que pueden crecer mucho y muy rápido."},
+  ]},
+]},
+{ title:"Estrategia y Crecimiento", desc:"Piensa como fundador, crece como profesional", color:"#ff9600", icon:"🧭",
+  lessons:[
+  { name:"Planea para ganar", icon:"🗺️", qs:[
+    {t:"mc", q:'Un "modelo de negocio" describe…', c:"Cómo un negocio crea valor y gana dinero",
+      w:["El edificio donde trabajas","Un emprendedor famoso","Una licencia del gobierno"],
+      exp:"Tu modelo de negocio responde: ¿a quién sirves, qué ofreces y cómo ganas?"},
+    {t:"fib", q:"MVP significa Producto Mínimo ___.", bank:["Viable","Valioso","Visible","Virtual"], a:"Viable",
+      exp:"Un MVP es la versión más simple que te permite probar tu idea con clientes reales."},
+    {t:"tf", q:"Un MVP debe incluir todas las funciones que puedas imaginar.", a:false,
+      exp:"Falso — la idea es lanzar pequeño, aprender rápido y mejorar."},
+    {t:"mc", q:'¿Qué es una "ventaja competitiva"?', c:"Algo que te permite superar a tus rivales de forma constante",
+      w:["Tener la oficina más grande","Trabajar más horas que nadie","Tener más reuniones"],
+      exp:"Puede ser costos más bajos, mejor tecnología, una marca fuerte o conocimiento único."},
+  ]},
+  { name:"Adáptate y crece", icon:"🌱", qs:[
+    {t:"mc", q:'En una startup, ¿qué es un "pivote"?', c:"Un cambio importante de estrategia basado en lo aprendido",
+      w:["Un tipo de silla de oficina","Despedir a todos los empleados","Duplicar todos los precios"],
+      exp:"Instagram pivotó de una app de check-ins a fotos. Pivotar es aprender, no fracasar."},
+    {t:"fib", q:"Un negocio es ___ si puede crecer sin que los costos crezcan igual de rápido.", bank:["escalable","caro","estacional","analógico"], a:"escalable",
+      exp:"El software es muy escalable: atender a un usuario más casi no cuesta nada."},
+    {t:"match", pairs:[["Pivote","Cambiar de dirección según lo aprendido"],["Escalar","Crecer con eficiencia"],
+      ["Hito","Una meta clave de progreso"],["KPI","Un número que mide el desempeño"]]},
+    {t:"tf", q:"Una meta SMART es Específica, Medible, Alcanzable, Relevante y con Tiempo definido.", a:true,
+      exp:'Verdadero — "conseguir 100 clientes de pago para junio" es mejor que "mejorar".'},
+  ]},
+  { name:"Mentalidad emprendedora", icon:"🧠", qs:[
+    {t:"mc", q:'¿Qué es un "emprendedor"?', c:"Alguien que crea y dirige un negocio asumiendo riesgos",
+      w:["Alguien que solo invierte en bolsa","Cualquier persona con empleo","Un funcionario del gobierno"],
+      exp:"Los emprendedores detectan oportunidades y aceptan riesgos para construir algo nuevo."},
+    {t:"tf", q:"Fracasar siempre significa que un emprendedor debe rendirse.", a:false,
+      exp:"Falso — la mayoría de los fundadores exitosos fracasaron antes. Cada error enseña qué no funciona."},
+    {t:"fib", q:"Una descripción corta y persuasiva de tu negocio es un ___ de elevador.", bank:["pitch","botón","viaje","piso"], a:"pitch",
+      exp:"Si no puedes explicar tu idea en 30 segundos, sigue puliéndola."},
+    {t:"mc", q:'"Networking" significa…', c:"Crear relaciones profesionales que pueden ayudar a tu negocio",
+      w:["Instalar cables de internet","Ver programas de televisión","Evitar a otros fundadores"],
+      exp:"Tu red te trae consejos, clientes, socios e inversionistas."},
+  ]},
+]},
+],
+/* ---------------- JAPANESE ---------------- */
+ja:[
+{ title:"ビジネスの基本", desc:"売上・利益・お金の基本用語", color:"#58cc02", icon:"💼",
+  lessons:[
+  { name:"お金の出入り", icon:"💵", qs:[
+    {t:"mc", q:"「売上（収益）」とは何でしょう？", c:"ビジネスが販売で得るお金の総額",
+      w:["経費を払った後に残るお金","銀行から借りたお金","創業者が投資したお金"],
+      exp:"売上は「トップライン」。コストを引く前に稼いだすべてのお金のことです。"},
+    {t:"fib", q:"利益 ＝ 売上 − ___", bank:["経費","資産","顧客","アイデア"], a:"経費",
+      exp:"利益は、売上からすべての経費を引いた残りです。"},
+    {t:"tf", q:"売上が多くても、お金を失うことがある。", a:true,
+      exp:"○ — 経費が売上を上回れば、ビジネスは赤字になります。"},
+    {t:"match", pairs:[["売上","販売で得たお金"],["経費","運営に使うお金"],
+      ["利益","売上から経費を引いたもの"],["損失","経費が売上を上回ること"]]},
+  ]},
+  { name:"キャッシュは王様", icon:"👑", qs:[
+    {t:"mc", q:"「キャッシュフロー」とは何でしょう？", c:"ビジネスに出入りするお金の流れ",
+      w:["会社の総価値","銀行口座の一種","従業員に払う給料"],
+      exp:"キャッシュフローは、お金が実際にいつ入り、いつ出ていくかを追跡します。"},
+    {t:"tf", q:"黒字の会社が現金不足になることは絶対にない。", a:false,
+      exp:"× — 入金が遅れて支払いが先に来ると、黒字の会社でも資金が尽きることがあります。"},
+    {t:"fib", q:"売上と費用がちょうど等しくなる点を___点という。", bank:["損益分岐","ピボット","資本","ブランド"], a:"損益分岐",
+      exp:"損益分岐点では利益も損失もゼロ。それ以降の販売はすべて利益になります。"},
+    {t:"mc", q:"固定費はどれでしょう？", c:"毎月のオフィスの家賃",
+      w:["製品ごとの原材料費","注文ごとの送料","販売手数料"],
+      exp:"固定費は売上に関係なく一定です。家賃は売れても売れなくても発生します。"},
+  ]},
+  { name:"顧客と価値", icon:"🎯", qs:[
+    {t:"mc", q:"「ターゲット市場」とは何でしょう？", c:"あなたの商品を最も買ってくれそうな特定の人々",
+      w:["世界中のすべての人","商品を売る店舗","競合他社のリスト"],
+      exp:"全員に売ろうとすると、結局誰にも売れません。絞り込みが勝負です。"},
+    {t:"fib", q:"顧客があなたを選ぶべき理由を説明するのが___提案。", bank:["価値","税金","供給","法律"], a:"価値",
+      exp:"価値提案は「あなたの商品が買う価値のあるものだ」という約束です。"},
+    {t:"match", pairs:[["B2B","企業向けの販売"],["B2C","消費者向けの販売"],
+      ["ニッチ","小さな専門市場"],["需要","顧客が商品をどれだけ欲しがるか"]]},
+    {t:"tf", q:"ニッチ市場は小さいから、常に悪い選択である。", a:false,
+      exp:"× — ニッチは競合が少なく、顧客のロイヤルティが高いことが多いです。"},
+  ]},
+]},
+{ title:"マーケティングと営業", desc:"顧客を獲得してリピーターにしよう", color:"#1cb0f6", icon:"📣",
+  lessons:[
+  { name:"ブランドを知ろう", icon:"✨", qs:[
+    {t:"mc", q:"「ブランディング」とは何でしょう？", c:"あなたのビジネスのアイデンティティと個性",
+      w:["商品にラベルを印刷すること","広告の一種","商号の法的登録"],
+      exp:"ブランドとは、人々があなたのビジネスに抱く感情のこと。ロゴだけではありません。"},
+    {t:"tf", q:"ロゴはブランドの唯一の要素である。", a:false,
+      exp:"× — ブランドには言葉のトーン、価値観、デザイン、顧客体験も含まれます。"},
+    {t:"fib", q:"顧客があなたを人にすすめてくれるのが___マーケティング。", bank:["口コミ","紙","財布","オフィス"], a:"口コミ",
+      exp:"口コミは無料で強力。満足した顧客があなたの営業担当になってくれます。"},
+    {t:"mc", q:"「独自の売り（USP）」とは何でしょう？", c:"競合と比べてあなたの商品を際立たせるもの",
+      w:["可能な限り安い価格","商品数が一番多い店","一度きりの割引"],
+      exp:"USPは顧客の疑問「なぜあなたから買うべきか？」への答えです。"},
+  ]},
+  { name:"顧客を勝ち取る", icon:"🏆", qs:[
+    {t:"mc", q:"「CAC」とは何の略でしょう？", c:"顧客獲得コスト — 新規顧客1人を得るためにかかるお金",
+      w:["年間企業資本","企業会計コード","顧客平均カート"],
+      exp:"広告に1万円使って10人の顧客を獲得したら、CACは1,000円です。"},
+    {t:"fib", q:"顧客___は、どれだけの顧客がリピートしてくれるかを測る。", bank:["維持率","税率","保険","インフレ"], a:"維持率",
+      exp:"維持率が高い＝顧客が定着している。新規獲得より安上がりなことが多いです。"},
+    {t:"match", pairs:[["リード","見込み客のこと"],["コンバージョン","見込み客を購入者に変えること"],
+      ["チャーン","購入をやめてしまった顧客"],["ロイヤルティ","何度も戻ってきてくれる顧客"]]},
+    {t:"tf", q:"既存顧客を維持するほうが、新規顧客を獲得するより安いことが多い。", a:true,
+      exp:"○ — 新規顧客の獲得には、既存顧客の維持の5倍のコストがかかることもあります。"},
+  ]},
+  { name:"セールスファネル", icon:"🌪️", qs:[
+    {t:"fib", q:"認知から購入までの顧客の旅を表すのがセールス___。", bank:["ファネル","はしご","橋","財布"], a:"ファネル",
+      exp:"上から多くの人が入り、下で買う人は少なくなる — だから漏斗（ファネル）と呼ばれます。"},
+    {t:"mc", q:"ファネルの最初の段階は、ふつうどれでしょう？", c:"認知 — 人々があなたの存在を知る",
+      w:["購入 — 人々が買う","ロイヤルティ — 人々が戻ってくる","返品 — 人々が商品を返す"],
+      exp:"買ってもらう前に、まず存在を知ってもらう必要があります。"},
+    {t:"tf", q:"あなたの商品を知った人は、全員買ってくれる。", a:false,
+      exp:"× — 各段階で一部の人しか先へ進みません。だからファネルは下にいくほど細くなります。"},
+    {t:"mc", q:"「アップセル」とは何でしょう？", c:"より大きい・より良い選択肢の購入を顧客にすすめること",
+      w:["損をして商品を売ること","店を早く閉めること","少額の注文を断ること"],
+      exp:"「プラス100円でLサイズはいかがですか？」— これがアップセルです。"},
+  ]},
+]},
+{ title:"お金とファイナンス", desc:"資産・利益率・夢の資金調達", color:"#ce82ff", icon:"🏦",
+  lessons:[
+  { name:"貸借対照表", icon:"⚖️", qs:[
+    {t:"match", pairs:[["資産","ビジネスが所有する価値あるもの"],["負債","ビジネスが返すべきお金"],
+      ["資本","オーナーの持ち分"],["借入金","返済が必要な借りたお金"]]},
+    {t:"mc", q:"「資産」はどれでしょう？", c:"会社が所有する配達用のバン",
+      w:["未払いの仕入先への請求書","返済すべき銀行ローン","来月の家賃"],
+      exp:"資産は所有する価値あるもの — 車両、現金、設備、在庫などです。"},
+    {t:"tf", q:"銀行ローンは、それを受け取ったビジネスにとって資産である。", a:false,
+      exp:"× — ローンは返済が必要なので負債です。受け取った現金のほうが資産です。"},
+    {t:"fib", q:"会計の等式：資産 ＝ 負債 ＋ ___", bank:["資本","売上","マーケティング","在庫"], a:"資本",
+      exp:"この等式は、すべての貸借対照表の土台です。"},
+  ]},
+  { name:"利益率とリターン", icon:"📈", qs:[
+    {t:"mc", q:"「利益率」とは何でしょう？", c:"売上のうち利益として手元に残る割合",
+      w:["請求書の端の余白","販売の総数","一番安い商品の価格"],
+      exp:"利益率 ＝ 利益 ÷ 売上。販売をどれだけ効率よく利益に変えているかを示します。"},
+    {t:"fib", q:"ROIは「___収益率（Return On Investment）」のこと。", bank:["投資","通信","在庫","給与"], a:"投資",
+      exp:"ROIは、投じた金額に対してどれだけ得たかを測ります。"},
+    {t:"tf", q:"利益率10%とは、売上100万円ごとに10万円が利益として残るということ。", a:true,
+      exp:"○ — 利益率は、売上に対する利益の割合です。"},
+    {t:"mc", q:"5,000円で仕入れて8,000円で売りました。粗利益はいくら？", c:"3,000円",
+      w:["8,000円","5,000円","13,000円"],
+      exp:"粗利益 ＝ 販売価格 − 仕入原価 ＝ 8,000円 − 5,000円 ＝ 3,000円。"},
+  ]},
+  { name:"夢に資金を", icon:"🚀", qs:[
+    {t:"mc", q:"「ブートストラッピング」とはどういう意味でしょう？", c:"自己資金と事業の収益だけでビジネスを運営すること",
+      w:["最初の従業員を雇うこと","競合のアイデアを真似すること","ビジネスをたたむこと"],
+      exp:"ブートストラップ起業家は外部投資家なしで成長し、経営権を完全に保ちます。"},
+    {t:"match", pairs:[["投資家","事業の持ち分と引き換えにお金を出す"],["ローン","利子をつけて返す借入金"],
+      ["クラウドファンディング","多数の小口出資（主にオンライン）"],["助成金","返さなくてもいいお金"]]},
+    {t:"fib", q:"投資家に株式を渡すことは、会社の___の一部を手放すこと。", bank:["所有権","家具","顧客","ロゴ"], a:"所有権",
+      exp:"投資マネーはタダではありません — 資金と引き換えに所有権（株式）を渡します。"},
+    {t:"tf", q:"ベンチャーキャピタルの投資家は、ふつう急成長を期待する。", a:true,
+      exp:"○ — VCは「大きく・速く」成長できるスタートアップに賭けます。"},
+  ]},
+]},
+{ title:"戦略と成長", desc:"創業者のように考え、プロのように成長しよう", color:"#ff9600", icon:"🧭",
+  lessons:[
+  { name:"勝つための計画", icon:"🗺️", qs:[
+    {t:"mc", q:"「ビジネスモデル」が説明するのは…", c:"ビジネスがどう価値を生み、どうお金を稼ぐか",
+      w:["働いている建物のこと","有名な起業家のこと","政府の許認可のこと"],
+      exp:"ビジネスモデルは「誰に・何を・どうやって稼ぐか」に答えます。"},
+    {t:"fib", q:"MVPとは「実用最小限の___」のこと。", bank:["製品","価格","会議","予算"], a:"製品",
+      exp:"MVPは、実際の顧客でアイデアを試せる最もシンプルなバージョンです。"},
+    {t:"tf", q:"MVPには、思いつく限りすべての機能を入れるべきだ。", a:false,
+      exp:"× — 小さく出して、速く学び、改善していくのがポイントです。"},
+    {t:"mc", q:"「競争優位性」とは何でしょう？", c:"ライバルに継続的に勝ち続けられる強み",
+      w:["一番大きいオフィスを持つこと","一番長い時間働くこと","一番多く会議をすること"],
+      exp:"低コスト、優れた技術、強いブランド、独自のノウハウなどが競争優位性になります。"},
+  ]},
+  { name:"適応して成長", icon:"🌱", qs:[
+    {t:"mc", q:"スタートアップでいう「ピボット」とは？", c:"学んだことに基づいて戦略を大きく転換すること",
+      w:["オフィスチェアの一種","全従業員を解雇すること","全商品の価格を2倍にすること"],
+      exp:"Instagramはチェックインアプリから写真アプリへピボットしました。ピボットは学びであって、失敗ではありません。"},
+    {t:"fib", q:"コストが同じ速さで増えずに成長できるビジネスは「___可能」という。", bank:["スケール","解雇","季節","停止"], a:"スケール",
+      exp:"ソフトウェアは非常にスケーラブル：ユーザーが1人増えてもコストはほぼゼロです。"},
+    {t:"match", pairs:[["ピボット","学びに基づく方向転換"],["スケール","効率よく成長すること"],
+      ["マイルストーン","重要な進捗の目標"],["KPI","業績を測る数字"]]},
+    {t:"tf", q:"SMARTな目標とは「具体的・測定可能・達成可能・関連性あり・期限付き」の目標のこと。", a:true,
+      exp:"○ —「6月までに有料顧客100人」は「もっと頑張る」よりずっと良い目標です。"},
+  ]},
+  { name:"起業家マインド", icon:"🧠", qs:[
+    {t:"mc", q:"「起業家」とはどんな人でしょう？", c:"リスクを引き受けてビジネスを始め、運営する人",
+      w:["株に投資するだけの人","仕事を持っているすべての人","政府の役人"],
+      exp:"起業家はチャンスを見つけ、リスクを受け入れて新しいものを築く人です。"},
+    {t:"tf", q:"失敗したら、起業家は必ずあきらめるべきだ。", a:false,
+      exp:"× — 成功した創業者の多くは先に失敗を経験しています。失敗は「何がダメか」を教えてくれます。"},
+    {t:"fib", q:"ビジネスを短く説得力をもって説明するのが「エレベーター___」。", bank:["ピッチ","ボタン","ホール","ドア"], a:"ピッチ",
+      exp:"30秒でアイデアを説明できないなら、まだ磨き続けましょう。"},
+    {t:"mc", q:"「ネットワーキング」とは…", c:"ビジネスに役立つ仕事上の人間関係を築くこと",
+      w:["インターネットケーブルを設置すること","テレビ番組を見ること","他の創業者を避けること"],
+      exp:"人脈はアドバイス、顧客、パートナー、投資家をもたらしてくれます。"},
+  ]},
+]},
+],
+};
+
+/* ================= Glossary (hover/tap definitions) ================= */
+const GLOSSARY = {
+en:{
+  "revenue":"All the money a business earns from sales, before subtracting any costs.",
+  "profit margin":"The percentage of revenue kept as profit. Margin = profit ÷ revenue.",
+  "gross profit":"Selling price minus the direct cost of the product.",
+  "profit":"The money left over after all expenses are paid.",
+  "expense":"Money a business spends to operate.",
+  "loss":"What happens when expenses are greater than revenue.",
+  "cash flow":"The movement of money in and out of a business.",
+  "break-even":"The point where revenue exactly covers costs — no profit, no loss.",
+  "fixed cost":"A cost that stays the same no matter how much you sell, like rent.",
+  "target market":"The specific group of people most likely to buy your product.",
+  "value proposition":"A clear statement of why customers should choose your offer.",
+  "B2B":"Business-to-business — selling to other companies.",
+  "B2C":"Business-to-consumer — selling directly to individuals.",
+  "niche":"A small, specialized segment of a market.",
+  "demand":"How much customers want and are willing to buy a product.",
+  "branding":"Building the identity and personality of a business.",
+  "brand":"The identity, personality and reputation of a business.",
+  "unique selling point":"The thing that makes your product different from competitors.",
+  "USP":"Unique Selling Point — what makes your product different from competitors.",
+  "word-of-mouth":"Marketing that happens when customers recommend you to others.",
+  "Customer Acquisition Cost":"The money spent to win one new customer.",
+  "CAC":"Customer Acquisition Cost — the money spent to win one new customer.",
+  "retention":"Keeping existing customers coming back over time.",
+  "lead":"A potential customer who has shown interest.",
+  "conversion":"Turning a potential customer into a paying one.",
+  "churn":"The rate at which customers stop buying from you.",
+  "loyalty":"When customers keep choosing you again and again.",
+  "sales funnel":"The customer journey from first hearing about you to buying.",
+  "awareness":"The stage where people first discover that you exist.",
+  "upsell":"Encouraging a customer to buy a bigger or better option.",
+  "asset":"Something valuable a business owns, like cash or equipment.",
+  "liability":"Money or obligations a business owes to others.",
+  "equity":"The owners' share of the business.",
+  "debt":"Borrowed money that must be repaid, usually with interest.",
+  "ROI":"Return On Investment — how much you gain compared to what you put in.",
+  "bootstrapping":"Growing a business using only your own money and its revenues.",
+  "investor":"Someone who gives money in exchange for a share of the business.",
+  "loan":"Borrowed money repaid over time with interest.",
+  "crowdfunding":"Raising many small contributions, usually online.",
+  "grant":"Funding you don't have to repay.",
+  "venture capital":"Investment in startups expected to grow very fast.",
+  "business model":"How a business creates value and makes money.",
+  "MVP":"Minimum Viable Product — the simplest version used to test an idea.",
+  "competitive advantage":"What lets a business consistently outperform rivals.",
+  "pivot":"A significant change in strategy based on what you've learned.",
+  "scalable":"Able to grow revenue without costs growing as fast.",
+  "milestone":"A key goal that marks progress.",
+  "KPI":"Key Performance Indicator — a number that tracks performance.",
+  "SMART":"Specific, Measurable, Achievable, Relevant, Time-bound.",
+  "entrepreneur":"Someone who starts and runs a business, taking on risk.",
+  "elevator pitch":"A short, persuasive description of your business — 30 seconds or less.",
+  "networking":"Building professional relationships that help your business.",
+},
+es:{
+  "ingresos":"Todo el dinero que un negocio gana por sus ventas, antes de restar costos.",
+  "margen de ganancia":"El porcentaje de los ingresos que se conserva como ganancia.",
+  "ganancia bruta":"Precio de venta menos el costo directo del producto.",
+  "ganancia":"El dinero que queda después de pagar todos los gastos.",
+  "gasto":"Dinero que un negocio usa para operar.",
+  "pérdida":"Ocurre cuando los gastos superan los ingresos.",
+  "flujo de caja":"El movimiento de dinero que entra y sale del negocio.",
+  "punto de equilibrio":"Donde los ingresos cubren exactamente los costos — ni ganancia ni pérdida.",
+  "costo fijo":"Un costo que no cambia sin importar cuánto vendas, como la renta.",
+  "mercado objetivo":"El grupo específico de personas con más probabilidad de comprar tu producto.",
+  "propuesta de valor":"Una declaración clara de por qué los clientes deben elegirte.",
+  "B2B":"De negocio a negocio — vender a otras empresas.",
+  "B2C":"De negocio a consumidor — vender directamente a personas.",
+  "nicho":"Un segmento pequeño y especializado de un mercado.",
+  "demanda":"Cuánto quieren y pueden comprar los clientes un producto.",
+  "branding":"Construir la identidad y personalidad de un negocio.",
+  "marca":"La identidad, personalidad y reputación de un negocio.",
+  "propuesta única de venta":"Lo que hace a tu producto diferente de la competencia.",
+  "USP":"Propuesta única de venta — lo que te hace diferente de la competencia.",
+  "boca a boca":"Marketing que ocurre cuando los clientes te recomiendan a otros.",
+  "Costo de Adquisición de Cliente":"Lo que gastas para ganar un cliente nuevo.",
+  "CAC":"Costo de Adquisición de Cliente — lo que gastas para ganar un cliente nuevo.",
+  "retención":"Lograr que los clientes existentes sigan volviendo.",
+  "lead":"Un cliente potencial que ha mostrado interés.",
+  "conversión":"Convertir a un interesado en cliente que paga.",
+  "churn":"La velocidad a la que los clientes dejan de comprarte.",
+  "lealtad":"Cuando los clientes te eligen una y otra vez.",
+  "embudo de ventas":"El camino del cliente desde que te descubre hasta que compra.",
+  "embudo":"El camino del cliente desde que te descubre hasta que compra.",
+  "conocimiento":"La etapa donde la gente descubre que existes.",
+  "upsell":"Animar al cliente a comprar una opción más grande o mejor.",
+  "activo":"Algo de valor que posee el negocio, como efectivo o equipo.",
+  "pasivo":"Dinero u obligaciones que el negocio debe a otros.",
+  "capital de riesgo":"Inversión en startups que se espera crezcan muy rápido.",
+  "capital":"La parte del negocio que pertenece a los dueños.",
+  "deuda":"Dinero prestado que debe devolverse, normalmente con intereses.",
+  "ROI":"Retorno de la Inversión — cuánto ganas comparado con lo que invertiste.",
+  "bootstrapping":"Crecer usando solo tu propio dinero y los ingresos del negocio.",
+  "inversionista":"Alguien que da dinero a cambio de una parte del negocio.",
+  "préstamo":"Dinero prestado que se devuelve con intereses.",
+  "crowdfunding":"Reunir muchas aportaciones pequeñas, normalmente en línea.",
+  "subvención":"Financiamiento que no tienes que devolver.",
+  "modelo de negocio":"Cómo un negocio crea valor y gana dinero.",
+  "MVP":"Producto Mínimo Viable — la versión más simple para probar una idea.",
+  "ventaja competitiva":"Lo que permite superar a los rivales de forma constante.",
+  "pivote":"Un cambio importante de estrategia basado en lo aprendido.",
+  "escalable":"Capaz de crecer sin que los costos crezcan igual de rápido.",
+  "hito":"Una meta clave que marca el progreso.",
+  "KPI":"Indicador Clave de Desempeño — un número que mide el rendimiento.",
+  "SMART":"Específica, Medible, Alcanzable, Relevante y con Tiempo definido.",
+  "emprendedor":"Alguien que crea y dirige un negocio asumiendo riesgos.",
+  "pitch":"Una descripción corta y persuasiva de tu negocio — 30 segundos o menos.",
+  "networking":"Crear relaciones profesionales que ayudan a tu negocio.",
+},
+ja:{
+  "売上":"商品やサービスの販売で得たお金の総額。コストを引く前の金額。",
+  "粗利益":"販売価格から商品の直接の原価を引いたもの。",
+  "利益率":"売上のうち利益として残る割合。利益率＝利益÷売上。",
+  "利益":"すべての経費を払った後に残るお金。",
+  "経費":"ビジネスの運営に使うお金。",
+  "損失":"経費が売上を上回ってしまった状態。",
+  "キャッシュフロー":"ビジネスに出入りするお金の流れ。",
+  "損益分岐点":"売上がちょうど費用と等しくなる点。利益も損失もゼロ。",
+  "固定費":"家賃のように、売上に関係なく一定にかかる費用。",
+  "ターゲット市場":"商品を最も買ってくれそうな特定の人々のグループ。",
+  "価値提案":"顧客があなたを選ぶべき理由を示す約束。",
+  "B2B":"企業向けにモノやサービスを販売すること。",
+  "B2C":"消費者に直接販売すること。",
+  "ニッチ":"小さくて専門的な市場セグメント。",
+  "需要":"顧客が商品をどれだけ欲しがり、買おうとするか。",
+  "ブランディング":"ビジネスのアイデンティティと個性を築くこと。",
+  "ブランド":"ビジネスの個性・イメージ・評判のこと。",
+  "USP":"独自の売り。競合と比べて商品を際立たせるもの。",
+  "口コミ":"顧客が他の人にあなたをすすめてくれること。無料で強力なマーケティング。",
+  "顧客獲得コスト":"新規顧客1人を得るためにかかるお金。",
+  "CAC":"顧客獲得コスト。新規顧客1人を得るためにかかるお金。",
+  "維持率":"既存顧客がどれだけリピートしてくれるかの割合。",
+  "リード":"興味を示してくれた見込み客。",
+  "コンバージョン":"見込み客をお金を払う顧客に変えること。",
+  "チャーン":"顧客が購入をやめてしまう割合。",
+  "ロイヤルティ":"顧客が何度もあなたを選び続けてくれること。",
+  "セールスファネル":"認知から購入までの顧客の旅。下にいくほど人数が減る。",
+  "ファネル":"認知から購入まで、顧客が進む漏斗型の道のり。",
+  "認知":"人々があなたの存在をはじめて知る段階。",
+  "アップセル":"より大きい・より良い選択肢の購入をすすめること。",
+  "資産":"現金や設備など、ビジネスが所有する価値あるもの。",
+  "負債":"ビジネスが他者に返さなければならないお金や義務。",
+  "資本":"ビジネスのうち、オーナーの持ち分にあたる部分。",
+  "借入金":"返済が必要な、借りたお金。",
+  "ROI":"投資収益率。投じた金額に対してどれだけ得たかを測る。",
+  "ブートストラッピング":"自己資金と事業の収益だけでビジネスを成長させること。",
+  "投資家":"事業の持ち分と引き換えにお金を出す人。",
+  "ローン":"利子をつけて返済する借入金。",
+  "クラウドファンディング":"多数の人から小口の出資を集めること。主にオンライン。",
+  "助成金":"返さなくてもいい資金。",
+  "ベンチャーキャピタル":"急成長が見込まれるスタートアップへの投資。",
+  "ビジネスモデル":"ビジネスがどう価値を生み、どうお金を稼ぐかの仕組み。",
+  "MVP":"実用最小限の製品。アイデアを試せる最もシンプルなバージョン。",
+  "競争優位性":"ライバルに継続的に勝ち続けられる強み。",
+  "ピボット":"学んだことに基づく戦略の大きな転換。",
+  "スケーラブル":"コストが同じ速さで増えずに成長できること。",
+  "スケール":"コストが同じ速さで増えずに成長すること。",
+  "マイルストーン":"重要な進捗の目標。",
+  "KPI":"重要業績評価指標。業績を測る数字。",
+  "SMART":"具体的・測定可能・達成可能・関連性あり・期限付き。",
+  "起業家":"リスクを引き受けてビジネスを始め、運営する人。",
+  "エレベーターピッチ":"ビジネスを30秒で説明できる、短く説得力のある紹介。",
+  "ピッチ":"ビジネスの短く説得力のある紹介。",
+  "ネットワーキング":"ビジネスに役立つ仕事上の人間関係を築くこと。",
+},
+};
+
+const ACH_DEFS = [
+  {id:"first", icon:"👣"},
+  {id:"perfect", icon:"💎"},
+  {id:"unit", icon:"🏅"},
+  {id:"xp100", icon:"💯"},
+  {id:"streak3", icon:"🔥"},
+];
+
+/* ================= State ================= */
+const KEY = "bizlingo-v1";
+const todayStr = () => new Date().toISOString().slice(0,10);
+let state = load();
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if(s && typeof s === "object") return normalize(s);
+  }catch(e){}
+  return normalize({});
+}
+function normalize(s){
+  s.lang = (s.lang && I18N[s.lang]) ? s.lang : null;
+  s.xp = s.xp|0; s.streak = s.streak|0;
+  s.lastActive = s.lastActive || null;
+  s.hearts = (s.hearts==null) ? 5 : s.hearts;
+  s.heartsDate = s.heartsDate || todayStr();
+  s.done = s.done || {};
+  s.ach = s.ach || [];
+  // daily heart refill
+  if(s.heartsDate !== todayStr()){ s.hearts = 5; s.heartsDate = todayStr(); }
+  return s;
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+function T(){ return I18N[state.lang || "en"]; }
+function units(){ return CONTENT[state.lang || "en"]; }
+
+/* ================= Audio ================= */
+let actx = null;
+function tone(seq){
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    let t = actx.currentTime;
+    seq.forEach(([f, d])=>{
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t+d);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t+d);
+      t += d*0.9;
+    });
+  }catch(e){}
+}
+const sndGood = ()=>tone([[660,.12],[880,.18]]);
+const sndBad  = ()=>tone([[330,.15],[247,.25]]);
+const sndWin  = ()=>tone([[523,.12],[659,.12],[784,.12],[1047,.3]]);
+
+/* ================= Helpers ================= */
+const app = document.getElementById("app");
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+/* ----- glossary annotation: wrap known terms in hoverable spans ----- */
+const _annRe = {}, _gloss = {};
+function annotate(text){
+  const lang = state.lang || "en";
+  const g = GLOSSARY[lang];
+  if(!g) return esc(text);
+  if(!_annRe[lang]){
+    const terms = Object.keys(g).sort((a,b)=>b.length-a.length)
+      .map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+    _annRe[lang] = (lang === "ja")
+      ? new RegExp("("+terms.join("|")+")","g")
+      : new RegExp("\\b("+terms.join("|")+")([a-záéíóúüñ]*)","gi");
+  }
+  return esc(text).replace(_annRe[lang], (m, base)=>
+    `<span class="term" data-term="${esc(base)}">${m}</span>`);
+}
+function termDef(term){
+  const lang = state.lang || "en";
+  if(!_gloss[lang]){
+    const m = {};
+    for(const k in GLOSSARY[lang]) m[k.toLowerCase()] = GLOSSARY[lang][k];
+    _gloss[lang] = m;
+  }
+  return _gloss[lang][term.toLowerCase()] || null;
+}
+const tipEl = document.createElement("div");
+tipEl.id = "tooltip";
+document.body.appendChild(tipEl);
+function showTip(el){
+  const term = el.dataset.term, def = termDef(term);
+  if(!def) return;
+  tipEl.innerHTML = `<b>💡 ${esc(term)}</b>${esc(def)}`;
+  tipEl.style.display = "block";
+  const r = el.getBoundingClientRect();
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  const x = Math.min(Math.max(8, r.left + r.width/2 - tw/2), window.innerWidth - tw - 8);
+  let y = r.top - th - 8;
+  if(y < 8) y = r.bottom + 8;
+  tipEl.style.left = x + "px"; tipEl.style.top = y + "px";
+}
+const hideTip = ()=>{ tipEl.style.display = "none"; };
+document.addEventListener("mouseover", e=>{ const t = e.target.closest(".term"); if(t) showTip(t); });
+document.addEventListener("mouseout", e=>{ if(e.target.closest(".term")) hideTip(); });
+document.addEventListener("click", e=>{ const t = e.target.closest(".term"); t ? showTip(t) : hideTip(); });
+window.addEventListener("scroll", hideTip, true);
+
+function confetti(){
+  const colors = ["#58cc02","#1cb0f6","#ffc800","#ff4b4b","#ce82ff","#ff9600"];
+  for(let i=0;i<70;i++){
+    const c = document.createElement("div"); c.className = "confetti";
+    c.style.left = Math.random()*100 + "vw";
+    const p = document.createElement("i");
+    p.style.background = colors[i % colors.length];
+    p.style.animationDuration = (1.6 + Math.random()*1.8) + "s";
+    p.style.animationDelay = (Math.random()*0.6) + "s";
+    p.style.transform = "rotate(" + (Math.random()*360) + "deg)";
+    c.appendChild(p); document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 4200);
+  }
+}
+function toast(html){
+  const d = document.createElement("div"); d.className = "toast"; d.innerHTML = html;
+  document.body.appendChild(d); setTimeout(()=>d.remove(), 3200);
+}
+function grantAch(id){
+  if(state.ach.includes(id)) return;
+  state.ach.push(id); save();
+  const def = ACH_DEFS.find(a=>a.id===id);
+  toast(`<span style="font-size:24px">${def.icon}</span><span>${esc(T().achUnlocked)}<br><small style="color:var(--gray)">${esc(T().ach[id])}</small></span>`);
+}
+function bumpStreak(){
+  const today = todayStr();
+  if(state.lastActive === today) return;
+  const y = new Date(); y.setDate(y.getDate()-1);
+  state.streak = (state.lastActive === y.toISOString().slice(0,10)) ? state.streak+1 : 1;
+  state.lastActive = today;
+  if(state.streak >= 3) grantAch("streak3");
+}
+
+/* ================= Screens ================= */
+function renderLangSelect(){
+  app.innerHTML = `
+    <div class="langselect">
+      <div class="mascot-big">🦉</div>
+      <h1>BizLingo</h1>
+      <p>Learn business the fun way · Aprende negocios jugando · 楽しくビジネスを学ぼう</p>
+      <div class="langgrid">
+        ${Object.keys(I18N).map(code=>`
+          <button class="langopt" data-lang="${code}">
+            <span class="flag">${I18N[code].flag}</span> ${I18N[code].name}
+          </button>`).join("")}
+      </div>
+    </div>`;
+  app.querySelectorAll(".langopt").forEach(b=>b.onclick = ()=>{
+    state.lang = b.dataset.lang; save(); renderHome(true);
+  });
+}
+
+function renderHome(showWelcome){
+  const t = T(), U = units();
+  // figure out the next unlocked lesson (linear path)
+  let nextKey = null;
+  outer: for(let u=0; u<U.length; u++) for(let l=0; l<U[u].lessons.length; l++){
+    if(!state.done[u+"-"+l]){ nextKey = u+"-"+l; break outer; }
+  }
+  let html = `
+    <header>
+      <div class="logo">🦉 BizLingo</div>
+      <div class="stats">
+        <span class="stat streak" title="${esc(t.dayStreak)}">🔥 ${state.streak}</span>
+        <span class="stat xp">⚡ ${state.xp} XP</span>
+        <span class="stat hearts">❤️ ${state.hearts}</span>
+        <button class="langbtn" id="langbtn">${T().flag}</button>
+      </div>
+    </header>`;
+  if(showWelcome){
+    html += `<div class="card" style="display:flex;gap:14px;align-items:center;margin-bottom:6px">
+      <span style="font-size:40px">🦉</span><div style="font-weight:700">${esc(t.welcome)}</div></div>`;
+  }
+  U.forEach((unit, u)=>{
+    html += `
+    <div class="unit-banner" style="background:${unit.color}">
+      <div><div class="unum">${esc(t.unit)} ${u+1}</div><h2>${unit.icon} ${esc(unit.title)}</h2><p>${annotate(unit.desc)}</p></div>
+    </div>
+    <div class="path">
+      ${unit.lessons.map((les, l)=>{
+        const key = u+"-"+l;
+        const done = !!state.done[key];
+        const isNext = key === nextKey;
+        const locked = !done && !isNext;
+        const pos = ["","l","r"][l % 3];
+        return `<div class="node-row ${pos}">
+          <button class="node ${done?"done":""} ${locked?"locked":""}" data-key="${key}" ${locked?"disabled":""}>
+            ${isNext?`<span class="start-tip">${esc(t.startHere)}</span>`:""}
+            ${done ? "👑" : (locked ? "🔒" : les.icon)}
+            <span class="label">${esc(les.name)}</span>
+          </button>
+        </div>`;
+      }).join("")}
+    </div>`;
+  });
+  html += `<h3 class="sec">🏆 ${esc(t.achievements)}</h3><div class="ach-row">
+    ${ACH_DEFS.map(a=>`<div class="ach ${state.ach.includes(a.id)?"won":""}"><span class="ic">${a.icon}</span>${esc(t.ach[a.id])}</div>`).join("")}
+  </div>`;
+  app.innerHTML = html;
+  document.getElementById("langbtn").onclick = renderLangSelect;
+  app.querySelectorAll(".node:not(.locked)").forEach(b=>b.onclick = ()=>{
+    const [u,l] = b.dataset.key.split("-").map(Number);
+    startLesson(u,l);
+  });
+}
+
+/* ================= Lesson ================= */
+let L = null; // lesson runtime state
+function startLesson(u, l){
+  const lesson = units()[u].lessons[l];
+  const practice = !!state.done[u+"-"+l];
+  L = {
+    u, l, practice,
+    queue: shuffle(lesson.qs.map((q,i)=>i)),
+    total: lesson.qs.length,
+    correct: 0, attempts: 0, mistakes: 0,
+    answered: false,
+  };
+  if(practice) toast(`<span style="font-size:22px">📚</span><span>${esc(T().practice)}</span>`);
+  renderQuestion();
+}
+
+function lessonData(){ return units()[L.u].lessons[L.l]; }
+
+function renderQuestion(){
+  if(!L.queue.length){ return finishLesson(); }
+  const t = T();
+  const q = lessonData().qs[L.queue[0]];
+  L.answered = false;
+  L.sel = null;
+  const pct = Math.round(100 * L.correct / L.total);
+  let typeLabel = {mc:t.typeMC, tf:t.typeTF, fib:t.typeFIB, match:t.typeMATCH}[q.t];
+  let body = "";
+  if(q.t === "mc"){
+    L.opts = shuffle([q.c, ...q.w]);
+    body = `<p class="qtext">${annotate(q.q)}</p><div class="opts">
+      ${L.opts.map((o,i)=>`<button class="opt" data-i="${i}">${annotate(o)}</button>`).join("")}</div>`;
+  } else if(q.t === "tf"){
+    body = `<p class="qtext">${annotate(q.q)}</p><div class="tfrow">
+      <button class="opt" data-v="true">✅ ${esc(t.trueW)}</button>
+      <button class="opt" data-v="false">❌ ${esc(t.falseW)}</button></div>`;
+  } else if(q.t === "fib"){
+    L.fill = null;
+    const parts = q.q.split("___");
+    body = `<p class="qtext" id="fibtext">${annotate(parts[0])}<span class="blank" id="blank">&nbsp;</span>${annotate(parts[1]||"")}</p>
+      <div class="bank">${shuffle(q.bank).map(w=>`<button class="tile" data-w="${esc(w)}">${esc(w)}</button>`).join("")}</div>`;
+  } else if(q.t === "match"){
+    L.matchDone = 0; L.matchSel = null; L.matchMistake = false;
+    const left = shuffle(q.pairs.map(p=>p[0]));
+    const right = shuffle(q.pairs.map(p=>p[1]));
+    const items = [];
+    for(let i=0;i<4;i++){ items.push({side:"l", v:left[i]}); items.push({side:"r", v:right[i]}); }
+    body = `<div class="matchgrid">${items.map((it,i)=>
+      `<button class="mitem" data-side="${it.side}" data-v="${esc(it.v)}">${esc(it.v)}</button>`).join("")}</div>`;
+  }
+  app.innerHTML = `
+    <div class="lesson-top">
+      <button class="quitx" id="quit">✕</button>
+      <div class="pbar"><div style="width:${pct}%"></div></div>
+      <div class="lhearts">${L.practice ? "📚" : "❤️ " + state.hearts}</div>
+    </div>
+    <div class="qtype">${esc(typeLabel)}</div>
+    ${body}
+    <div class="footerbar" id="fbar"><div class="inner">
+      <div id="fmsg"></div>
+      <button class="btn" id="checkbtn" disabled>${esc(t.check)}</button>
+    </div></div>`;
+  document.getElementById("quit").onclick = confirmQuit;
+  const checkBtn = document.getElementById("checkbtn");
+
+  if(q.t === "mc"){
+    app.querySelectorAll(".opt").forEach(b=>b.onclick = ()=>{
+      if(L.answered) return;
+      app.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));
+      b.classList.add("sel"); L.sel = L.opts[+b.dataset.i]; checkBtn.disabled = false;
+    });
+    checkBtn.onclick = ()=>{ if(!L.answered) gradeSimple(L.sel === q.c, q.c, q.exp); };
+  } else if(q.t === "tf"){
+    app.querySelectorAll(".opt").forEach(b=>b.onclick = ()=>{
+      if(L.answered) return;
+      app.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));
+      b.classList.add("sel"); L.sel = b.dataset.v === "true"; checkBtn.disabled = false;
+    });
+    checkBtn.onclick = ()=>{ if(!L.answered) gradeSimple(L.sel === q.a, (q.a?t.trueW:t.falseW), q.exp); };
+  } else if(q.t === "fib"){
+    const blank = document.getElementById("blank");
+    app.querySelectorAll(".tile").forEach(b=>b.onclick = ()=>{
+      if(L.answered || b.classList.contains("used")) return;
+      // return previous
+      if(L.fill){ const prev = app.querySelector(`.tile[data-w="${CSS.escape(L.fill)}"]`); if(prev) prev.classList.remove("used"); }
+      L.fill = b.dataset.w; b.classList.add("used");
+      blank.textContent = L.fill; checkBtn.disabled = false;
+    });
+    blank.onclick = ()=>{
+      if(L.answered || !L.fill) return;
+      const prev = app.querySelector(`.tile[data-w="${CSS.escape(L.fill)}"]`);
+      if(prev) prev.classList.remove("used");
+      L.fill = null; blank.innerHTML = "&nbsp;"; checkBtn.disabled = true;
+    };
+    checkBtn.onclick = ()=>{ if(!L.answered) gradeSimple(L.fill === q.a, q.a, q.exp); };
+  } else if(q.t === "match"){
+    checkBtn.style.display = "none";
+    const pairsMap = new Map(q.pairs.map(p=>[p[0], p[1]]));
+    app.querySelectorAll(".mitem").forEach(b=>b.onclick = ()=>{
+      if(b.classList.contains("done") || L.answered) return;
+      if(L.matchSel === b){ b.classList.remove("sel"); L.matchSel = null; return; }
+      if(!L.matchSel || L.matchSel.dataset.side === b.dataset.side){
+        if(L.matchSel) L.matchSel.classList.remove("sel");
+        b.classList.add("sel"); L.matchSel = b; return;
+      }
+      // attempt a pair
+      const lEl = b.dataset.side === "l" ? b : L.matchSel;
+      const rEl = b.dataset.side === "r" ? b : L.matchSel;
+      const good = pairsMap.get(lEl.dataset.v) === rEl.dataset.v;
+      const sel = L.matchSel; L.matchSel = null;
+      sel.classList.remove("sel");
+      if(good){
+        sndGood();
+        [lEl, rEl].forEach(x=>{ x.classList.add("done"); x.classList.remove("sel"); });
+        L.matchDone++;
+        if(L.matchDone === 4){
+          L.answered = true; L.attempts++;
+          if(!L.matchMistake){ L.correct++; advanceQueue(true); }
+          else { L.mistakes++; L.correct++; advanceQueue(true); } // matched all eventually; counts done, not perfect
+          showFeedback(!L.matchMistake, null, null, true);
+        }
+      } else {
+        sndBad(); L.matchMistake = true;
+        [lEl, rEl].forEach(x=>{ x.classList.add("shake"); setTimeout(()=>x.classList.remove("shake"), 380); });
+      }
+    });
+  }
+}
+
+function advanceQueue(correct){
+  if(correct){ L.queue.shift(); }
+  else { L.queue.push(L.queue.shift()); } // see it again later
+}
+
+function gradeSimple(ok, correctAnswer, exp){
+  L.answered = true; L.attempts++;
+  if(ok){ L.correct++; sndGood(); }
+  else {
+    L.mistakes++; sndBad();
+    if(!L.practice){
+      state.hearts = Math.max(0, state.hearts - 1); save();
+      const lh = app.querySelector(".lhearts"); if(lh) lh.textContent = "❤️ " + state.hearts;
+    }
+  }
+  advanceQueue(ok);
+  // paint options
+  const q = lessonData().qs; // current question already shifted/pushed; use DOM classes instead
+  app.querySelectorAll(".opt").forEach(b=>{
+    const isSel = b.classList.contains("sel");
+    const val = b.dataset.v != null ? (b.dataset.v==="true" ? true : false) : (L.opts ? L.opts[+b.dataset.i] : null);
+    const isCorrect = (typeof correctAnswer === "string") ? (b.textContent.trim() === correctAnswer || val === correctAnswer)
+                                                          : false;
+    if(isSel && ok) b.classList.add("right");
+    else if(isSel && !ok) b.classList.add("wrong");
+    if(!ok && b.textContent.trim().replace(/^([✅❌]\s*)/,"") === String(correctAnswer)) b.classList.add("right");
+  });
+  const blank = document.getElementById("blank");
+  if(blank){ blank.style.color = ok ? "var(--green-dark)" : "var(--red-dark)"; }
+  showFeedback(ok, correctAnswer, exp, false);
+  if(!L.practice && state.hearts === 0){ setTimeout(showNoHearts, 600); }
+}
+
+function showFeedback(ok, correctAnswer, exp, isMatch){
+  const t = T();
+  const bar = document.getElementById("fbar");
+  bar.className = "footerbar " + (ok ? "good" : "bad");
+  const msg = document.getElementById("fmsg");
+  const praise = ok ? (Math.random()<.5 ? t.correct : t.correctAlts[Math.floor(Math.random()*t.correctAlts.length)]) : t.wrong;
+  msg.innerHTML = `<div class="fb-msg ${ok?"good":"bad"}">${ok?"✅":"❌"} ${esc(praise)}</div>` +
+    (!ok && correctAnswer ? `<div class="fb-sub"><b>${esc(t.answerWas)}</b> ${esc(correctAnswer)} · ${esc(t.tryLater)}</div>` : "") +
+    (exp ? `<div class="fb-sub">${annotate(exp)}</div>` : "");
+  let btn = document.getElementById("checkbtn");
+  btn.style.display = "";
+  btn.disabled = false;
+  btn.textContent = t.continueBtn;
+  btn.className = "btn " + (ok ? "" : "red");
+  btn.onclick = ()=>{
+    if(!L.practice && state.hearts === 0){ showNoHearts(); return; }
+    renderQuestion();
+  };
+}
+
+function showNoHearts(){
+  const t = T();
+  if(document.querySelector(".modal-back")) return;
+  const d = document.createElement("div"); d.className = "modal-back";
+  d.innerHTML = `<div class="modal"><div style="font-size:54px">💔</div>
+    <h2>${esc(t.noHearts)}</h2><p>${esc(t.noHeartsBody)}</p>
+    <button class="btn blue" id="nh-ok">${esc(t.ok)}</button></div>`;
+  document.body.appendChild(d);
+  d.querySelector("#nh-ok").onclick = ()=>{ d.remove(); renderHome(); };
+}
+
+function confirmQuit(){
+  const t = T();
+  const d = document.createElement("div"); d.className = "modal-back";
+  d.innerHTML = `<div class="modal"><div style="font-size:54px">🦉</div>
+    <h2>${esc(t.quitTitle)}</h2><p>${esc(t.quitBody)}</p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+      <button class="btn" id="q-stay">${esc(t.stay)}</button>
+      <button class="btn ghost" id="q-leave">${esc(t.leave)}</button></div></div>`;
+  document.body.appendChild(d);
+  d.querySelector("#q-stay").onclick = ()=>d.remove();
+  d.querySelector("#q-leave").onclick = ()=>{ d.remove(); renderHome(); };
+}
+
+function finishLesson(){
+  const t = T();
+  const perfect = L.mistakes === 0;
+  const xpGain = L.practice ? 5 : (10 + (perfect ? 5 : 0));
+  const accuracy = L.attempts ? Math.round(100 * L.total / L.attempts) : 100;
+  const key = L.u + "-" + L.l;
+  const wasNew = !state.done[key];
+  state.done[key] = true;
+  state.xp += xpGain;
+  bumpStreak();
+  save();
+  sndWin(); confetti();
+  app.innerHTML = `
+    <div class="complete">
+      <div class="mascot-big">🦉🎉</div>
+      <h1>${esc(t.done)}</h1>
+      <p>${perfect ? "💎 " + esc(t.perfect) : esc(units()[L.u].lessons[L.l].name)}</p>
+      <div class="scorecards">
+        <div class="scorecard sc-xp"><div class="top">${esc(t.earned)}</div><div class="val">⚡ +${xpGain}</div></div>
+        <div class="scorecard sc-acc"><div class="top">${esc(t.accuracy)}</div><div class="val">🎯 ${accuracy}%</div></div>
+      </div>
+      <button class="btn" id="homebtn">${esc(t.continueBtn)}</button>
+    </div>`;
+  // achievements
+  grantAch("first");
+  if(perfect && wasNew) grantAch("perfect");
+  if(state.xp >= 100) grantAch("xp100");
+  const unitDone = units()[L.u].lessons.every((_,i)=>state.done[L.u+"-"+i]);
+  if(unitDone) grantAch("unit");
+  save();
+  document.getElementById("homebtn").onclick = ()=>renderHome();
+}
+
+/* ================= Boot ================= */
+if(!state.lang) renderLangSelect(); else renderHome();
+
+/* ================= PWA: offline support ================= */
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  addEventListener("load", ()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
