@@ -233,6 +233,10 @@
   .nameinput{width:100%; box-sizing:border-box; border:2px solid var(--line); border-radius:12px; padding:11px 13px; font-size:15px; font-weight:600; margin-bottom:14px;}
   .modal .row2{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
   .friendwrap{padding-top:6vh; text-align:center;}
+  /* small companion cat preview on the home screen */
+  .companion{height:118px; display:flex; justify-content:center; overflow:hidden; margin-top:2px;}
+  .companion .catstage{transform:scale(.6); transform-origin:top center; margin-top:-4px;}
+  .companion .cat-cap{display:none;}
 
   /* ---------- animated anime cat ---------- */
   .catstage{
@@ -2071,7 +2075,8 @@ function renderHome(showWelcome){
         <div class="rk-sub">⚡ ${state.xp} XP · ${nextTxt}</div>
       </div>
       <button class="rk-share" id="sharebtn">📣 ${esc(t.shareBtn)}</button>
-    </div>`;
+    </div>
+    <div class="companion" id="companion">${catStageHTML()}</div>`;
   }
   U.forEach((unit, u)=>{
     html += `
@@ -2101,6 +2106,7 @@ function renderHome(showWelcome){
   app.innerHTML = html;
   document.getElementById("langbtn").onclick = renderLangSelect;
   const sb = document.getElementById("sharebtn"); if(sb) sb.onclick = openShare;
+  runCatShow(document.querySelector("#companion .catstage"), state.lang || "en");
   app.querySelectorAll(".node:not(.locked)").forEach(b=>b.onclick = ()=>{
     const [u,l] = b.dataset.key.split("-").map(Number);
     startLesson(u,l);
