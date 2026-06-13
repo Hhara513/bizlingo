@@ -205,6 +205,28 @@
   .modal-back{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; display:flex; align-items:center; justify-content:center; padding:20px;}
   .modal{background:#fff; border-radius:20px; padding:28px; max-width:380px; text-align:center;}
   .modal h2{margin:8px 0 8px;} .modal p{color:var(--gray); margin:0 0 20px;}
+
+  /* ---------- rank + sharing ---------- */
+  .rankcard{display:flex; align-items:center; gap:14px; background:#fff; border:2px solid var(--line); border-radius:16px; padding:14px 16px; margin:8px 0 4px;}
+  .rankcard .rk-ic{font-size:38px; line-height:1;}
+  .rankcard .rk-body{flex:1; min-width:0;}
+  .rk-title{font-weight:900; font-size:16px;}
+  .rk-bar{height:10px; background:#eee; border-radius:6px; overflow:hidden; margin:6px 0 4px;}
+  .rk-bar>div{height:100%; background:var(--gold); border-radius:6px; transition:width .4s ease;}
+  .rk-sub{font-size:12.5px; color:var(--gray); font-weight:700;}
+  .rk-share{border:none; background:var(--blue); color:#fff; font-weight:800; font-size:14px; border-radius:12px; padding:10px 13px; cursor:pointer; box-shadow:0 3px 0 var(--blue-dark); white-space:nowrap;}
+  .rk-share:active{transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark);}
+  .scorecard-share{background:linear-gradient(135deg,#1cb0f6,#58cc02); border-radius:18px; padding:20px 16px; color:#fff; text-align:center; margin-bottom:16px;}
+  .scorecard-share .sc-rank{font-size:46px; line-height:1;}
+  .scorecard-share .sc-name{font-weight:900; font-size:20px; margin:6px 0 2px; word-break:break-word;}
+  .scorecard-share .sc-rk{font-weight:800; opacity:.95; margin-bottom:14px;}
+  .sc-stats{display:flex; justify-content:center; gap:8px; flex-wrap:wrap;}
+  .sc-stat{background:rgba(255,255,255,.2); border-radius:12px; padding:8px 12px; min-width:62px;}
+  .sc-stat .n{font-size:19px; font-weight:900;}
+  .sc-stat .l{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; opacity:.92;}
+  .nameinput{width:100%; box-sizing:border-box; border:2px solid var(--line); border-radius:12px; padding:11px 13px; font-size:15px; font-weight:600; margin-bottom:14px;}
+  .modal .row2{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .friendwrap{padding-top:6vh; text-align:center;}
 </style>
 </head>
 <body>
@@ -232,6 +254,11 @@ en:{
        unit:"Unit Champion — complete a whole unit", xp100:"Centurion — earn 100 XP", streak3:"On Fire — 3-day streak"},
   achUnlocked:"Achievement unlocked!",
   dayStreak:"day streak",
+  share:"Share my progress", shareBtn:"Share", copyLink:"Copy link", copied:"Link copied to clipboard!",
+  yourName:"Your name (optional)", shareTitle:"Share your progress", shareSub:"Challenge a friend to beat it!",
+  rank:"Rank", lessonsDone:"Lessons", topRank:"Top rank — you run the show!",
+  friendIntro:"shared their BizLingo scorecard!", beatScore:"Beat their score", startLearning:"Start learning",
+  ranks:{intern:"Intern", associate:"Associate", manager:"Manager", director:"Director", vp:"VP", founder:"Founder"},
 },
 es:{
   name:"Español", flag:"🇪🇸",
@@ -251,6 +278,11 @@ es:{
        unit:"Campeón de unidad — completa una unidad entera", xp100:"Centurión — gana 100 XP", streak3:"En llamas — racha de 3 días"},
   achUnlocked:"¡Logro desbloqueado!",
   dayStreak:"días de racha",
+  share:"Compartir mi progreso", shareBtn:"Compartir", copyLink:"Copiar enlace", copied:"¡Enlace copiado!",
+  yourName:"Tu nombre (opcional)", shareTitle:"Comparte tu progreso", shareSub:"¡Reta a un amigo a superarlo!",
+  rank:"Rango", lessonsDone:"Lecciones", topRank:"¡Rango máximo — mandas tú!",
+  friendIntro:"compartió su tarjeta de BizLingo:", beatScore:"Supera su puntuación", startLearning:"Empezar a aprender",
+  ranks:{intern:"Becario", associate:"Asociado", manager:"Gerente", director:"Director", vp:"Vicepresidente", founder:"Fundador"},
 },
 ja:{
   name:"日本語", flag:"🇯🇵",
@@ -270,6 +302,11 @@ ja:{
        unit:"ユニット制覇 — ユニットを全部完了", xp100:"百人隊長 — 100 XPを獲得", streak3:"絶好調 — 3日連続で学習"},
   achUnlocked:"実績を達成！",
   dayStreak:"日連続",
+  share:"進捗をシェア", shareBtn:"シェア", copyLink:"リンクをコピー", copied:"リンクをコピーしました！",
+  yourName:"お名前（任意）", shareTitle:"進捗をシェアしよう", shareSub:"友だちに挑戦状を！",
+  rank:"ランク", lessonsDone:"レッスン", topRank:"最高ランク — あなたがボス！",
+  friendIntro:"さんがBizLingoのスコアを送ってきました！", beatScore:"スコアを超えろ", startLearning:"学習を始める",
+  ranks:{intern:"インターン", associate:"アソシエイト", manager:"マネージャー", director:"ディレクター", vp:"バイスプレジデント", founder:"創業者"},
 },
 };
 
@@ -551,6 +588,45 @@ en:[
       ["Contribution margin","Price minus variable cost"],["Break-even","Where total profit covers fixed costs"]]},
   ]},
 ]},
+{ title:"Running the Day-to-Day", desc:"Inventory, hiring, taxes and keeping customers happy", color:"#ff9600", icon:"⚙️",
+  lessons:[
+  { name:"Stock & Suppliers", icon:"📦", qs:[
+    {t:"mc", q:"What is 'inventory'?", c:"The stock of products and materials a business has on hand",
+      w:["The list of company employees","Money owed to the bank","The company's marketing plan"],
+      exp:"For City Dog, inventory includes finished treat bags plus the oats and peanut butter waiting to be baked."},
+    {t:"mc", q:"Why is holding too much inventory risky?", c:"It ties up cash and the stock can spoil or go out of date",
+      w:["It always increases your profit","Customers dislike full shelves","It lowers your taxes automatically"],
+      exp:"Extra stock is cash sitting on a shelf — and perishable treats can expire before they sell."},
+    {t:"fib", q:"___ time is how long a supplier takes to deliver after you place an order.", bank:["Lead","Down","Over","Spare"], a:"Lead",
+      exp:"If oats take 2 weeks to arrive, you must reorder before you run out."},
+    {t:"match", pairs:[["Inventory","Stock on hand"],["Supplier","Who you buy materials from"],
+      ["Lead time","Wait between order and delivery"],["Reorder point","Stock level that triggers a new order"]]},
+  ]},
+  { name:"Building a Team", icon:"🤝", qs:[
+    {t:"mc", q:"What is the difference between an employee and a contractor?", c:"An employee works for you ongoing; a contractor is hired for specific work",
+      w:["There is no difference at all","Contractors must be paid more by law","Employees can never be paid hourly"],
+      exp:"Contractors handle their own taxes and tools; employees get more structure and benefits. The line matters for taxes."},
+    {t:"tf", q:"Delegating tasks lets a founder focus on what only they can do.", a:true,
+      exp:"You can't bake every treat AND run marketing forever. Hiring and delegation is how you grow."},
+    {t:"fib", q:"___ is the process of welcoming and training a new hire.", bank:["Onboarding","Offboarding","Outsourcing","Overbooking"], a:"Onboarding",
+      exp:"Good onboarding gets new people productive — and happy to stay."},
+    {t:"mc", q:"What is 'payroll'?", c:"The system for paying employees their wages and handling deductions",
+      w:["A roll of paper receipts","The list of your customers","A type of business loan"],
+      exp:"Payroll also handles tax withholding — getting it wrong causes real legal trouble."},
+  ]},
+  { name:"Customers & Compliance", icon:"🛟", qs:[
+    {t:"mc", q:"Why does great customer service matter so much for a small business?", c:"Happy customers return and recommend you, which is cheap growth",
+      w:["It lets you ignore product quality","It replaces the need for any pricing","It only helps big corporations"],
+      exp:"A loyal City Dog customer who tells three friends is worth more than one ad."},
+    {t:"mc", q:"What is a 'business license'?", c:"Official permission from the government to legally operate your business",
+      w:["A driver's license for the owner","A coupon for customers","A software subscription"],
+      exp:"Most places require one — operating without it can mean fines or being shut down."},
+    {t:"tf", q:"In many places you must collect sales tax from customers and pass it to the government.", a:true,
+      exp:"That money was never yours to keep — collect it, set it aside, and remit it on time."},
+    {t:"fib", q:"Following the laws and rules for your business is called ___.", bank:["compliance","accounting","branding","networking"], a:"compliance",
+      exp:"Staying compliant — licenses, taxes, safety rules — keeps the business out of trouble."},
+  ]},
+]},
 ],
 /* ---------------- SPANISH ---------------- */
 es:[
@@ -820,6 +896,45 @@ es:[
       exp:"Unidades de equilibrio = costos fijos ÷ ganancia por unidad = $1,200 ÷ $3 = 400."},
     {t:"match", pairs:[["Costo variable","Cambia con cada unidad que produces"],["Costo fijo","Se mantiene igual cada mes"],
       ["Margen de contribución","Precio menos costo variable"],["Punto de equilibrio","Donde la ganancia total cubre los costos fijos"]]},
+  ]},
+]},
+{ title:"El día a día del negocio", desc:"Inventario, contratación, impuestos y clientes felices", color:"#ff9600", icon:"⚙️",
+  lessons:[
+  { name:"Stock y proveedores", icon:"📦", qs:[
+    {t:"mc", q:"¿Qué es el 'inventario'?", c:"Las existencias de productos y materiales que tiene un negocio",
+      w:["La lista de empleados","El dinero que se debe al banco","El plan de marketing"],
+      exp:"Para City Dog, el inventario incluye las bolsas de premios terminadas y la avena y mantequilla de maní listas para hornear."},
+    {t:"mc", q:"¿Por qué es arriesgado tener demasiado inventario?", c:"Inmoviliza efectivo y el stock puede caducar o pasar de moda",
+      w:["Siempre aumenta tu ganancia","A los clientes les disgustan los estantes llenos","Reduce tus impuestos automáticamente"],
+      exp:"El stock extra es efectivo parado en un estante, y los premios perecederos pueden caducar antes de venderse."},
+    {t:"fib", q:"El plazo de ___ es cuánto tarda un proveedor en entregar tras hacer un pedido.", bank:["entrega","pago","cierre","sobra"], a:"entrega",
+      exp:"Si la avena tarda 2 semanas en llegar, debes volver a pedir antes de quedarte sin ella."},
+    {t:"match", pairs:[["Inventario","Existencias disponibles"],["Proveedor","A quién le compras materiales"],
+      ["Plazo de entrega","Espera entre el pedido y la entrega"],["Punto de pedido","Nivel de stock que activa un nuevo pedido"]]},
+  ]},
+  { name:"Formar un equipo", icon:"🤝", qs:[
+    {t:"mc", q:"¿Cuál es la diferencia entre un empleado y un contratista?", c:"Un empleado trabaja para ti de forma continua; un contratista se contrata para un trabajo específico",
+      w:["No hay ninguna diferencia","Por ley hay que pagar más a los contratistas","A los empleados nunca se les paga por hora"],
+      exp:"Los contratistas manejan sus propios impuestos y herramientas; los empleados tienen más estructura y beneficios. La diferencia importa para los impuestos."},
+    {t:"tf", q:"Delegar tareas permite al fundador enfocarse en lo que solo él puede hacer.", a:true,
+      exp:"No puedes hornear cada premio Y hacer marketing para siempre. Contratar y delegar es cómo creces."},
+    {t:"fib", q:"La ___ es el proceso de dar la bienvenida y capacitar a un nuevo empleado.", bank:["incorporación","desvinculación","subcontratación","sobreventa"], a:"incorporación",
+      exp:"Una buena incorporación hace productivas a las personas nuevas, y felices de quedarse."},
+    {t:"mc", q:"¿Qué es la 'nómina'?", c:"El sistema para pagar a los empleados sus salarios y gestionar las deducciones",
+      w:["Un rollo de recibos","La lista de clientes","Un tipo de préstamo"],
+      exp:"La nómina también gestiona la retención de impuestos: equivocarse causa problemas legales reales."},
+  ]},
+  { name:"Clientes y cumplimiento", icon:"🛟", qs:[
+    {t:"mc", q:"¿Por qué importa tanto un buen servicio al cliente para un pequeño negocio?", c:"Los clientes felices vuelven y te recomiendan, y eso es crecimiento barato",
+      w:["Te permite ignorar la calidad del producto","Reemplaza la necesidad de fijar precios","Solo sirve para grandes corporaciones"],
+      exp:"Un cliente leal de City Dog que se lo cuenta a tres amigos vale más que un anuncio."},
+    {t:"mc", q:"¿Qué es una 'licencia comercial'?", c:"El permiso oficial del gobierno para operar tu negocio legalmente",
+      w:["Una licencia de conducir del dueño","Un cupón para clientes","Una suscripción de software"],
+      exp:"En la mayoría de los lugares se exige una; operar sin ella puede traer multas o el cierre."},
+    {t:"tf", q:"En muchos lugares debes cobrar impuesto sobre las ventas a los clientes y entregarlo al gobierno.", a:true,
+      exp:"Ese dinero nunca fue tuyo: cóbralo, sepáralo y entrégalo a tiempo."},
+    {t:"fib", q:"Seguir las leyes y normas de tu negocio se llama ___.", bank:["cumplimiento","contabilidad","branding","networking"], a:"cumplimiento",
+      exp:"Mantener el cumplimiento — licencias, impuestos, normas de seguridad — evita problemas al negocio."},
   ]},
 ]},
 ],
@@ -1093,6 +1208,45 @@ ja:[
       ["限界利益","価格から変動費を引いたもの"],["損益分岐点","総利益が固定費を賄う点"]]},
   ]},
 ]},
+{ title:"日々の運営", desc:"在庫・採用・税金、そして顧客満足", color:"#ff9600", icon:"⚙️",
+  lessons:[
+  { name:"在庫と仕入先", icon:"📦", qs:[
+    {t:"mc", q:"「在庫」とは？", c:"事業が手元に持っている製品や材料のストック",
+      w:["従業員の一覧","銀行への借金","会社のマーケティング計画"],
+      exp:"City Dogなら、在庫には完成したおやつの袋と、これから焼くオーツ麦やピーナッツバターが含まれます。"},
+    {t:"mc", q:"在庫を持ちすぎると、なぜリスクになる？", c:"現金が寝てしまい、傷んだり古くなったりする",
+      w:["必ず利益が増える","棚が満杯だと客が嫌がる","自動的に税金が下がる"],
+      exp:"余分な在庫は棚で眠る現金。傷みやすいおやつは売れる前に期限が切れることもあります。"},
+    {t:"fib", q:"発注してから届くまでの時間を「___タイム」という。", bank:["リード","ダウン","オーバー","フリー"], a:"リード",
+      exp:"オーツ麦が届くのに2週間かかるなら、切らす前に発注しておく必要があります。"},
+    {t:"match", pairs:[["在庫","手元のストック"],["仕入先","材料を買う相手"],
+      ["リードタイム","発注から納品までの待ち時間"],["発注点","新たに発注するきっかけになる在庫量"]]},
+  ]},
+  { name:"チームをつくる", icon:"🤝", qs:[
+    {t:"mc", q:"従業員と業務委託（請負）の違いは？", c:"従業員は継続的に働き、業務委託は特定の仕事のために依頼する",
+      w:["まったく違いはない","法律で請負には多く払う必要がある","従業員は時給で払えない"],
+      exp:"業務委託は自分の税金や道具を自分で管理し、従業員はより手厚い体制や福利を得ます。この違いは税務上も重要です。"},
+    {t:"tf", q:"仕事を任せる（委任する）ことで、創業者は自分にしかできないことに集中できる。", a:true,
+      exp:"おやつを全部焼きながら、ずっとマーケティングもこなすのは無理。採用と委任が成長の鍵です。"},
+    {t:"fib", q:"新しい人を迎え入れ、教育する流れを「___」という。", bank:["オンボーディング","アウトソーシング","オフボーディング","オーバーブッキング"], a:"オンボーディング",
+      exp:"良いオンボーディングは、新しい人を早く戦力にし、長く働きたいと思わせます。"},
+    {t:"mc", q:"「給与計算（ペイロール）」とは？", c:"従業員に賃金を支払い、控除を処理するしくみ",
+      w:["レシートの束","顧客の一覧","ローンの一種"],
+      exp:"給与計算は税金の源泉徴収も扱います。間違えると本当に法的なトラブルになります。"},
+  ]},
+  { name:"顧客とコンプライアンス", icon:"🛟", qs:[
+    {t:"mc", q:"なぜ小さな事業ほど顧客サービスが大切？", c:"満足した顧客は戻り、人にすすめてくれる。これは安上がりな成長",
+      w:["製品の品質を無視できるから","値づけが不要になるから","大企業にしか役立たないから"],
+      exp:"City Dogの常連客が友達3人に話してくれれば、それは広告1本より価値があります。"},
+    {t:"mc", q:"「事業許可（営業許可）」とは？", c:"事業を合法的に営むための、政府からの正式な許可",
+      w:["オーナーの運転免許","顧客向けのクーポン","ソフトの定期購読"],
+      exp:"多くの地域で必要です。無許可で営業すると、罰金や営業停止になることも。"},
+    {t:"tf", q:"多くの地域では、顧客から消費税（売上税）を預かり、政府に納める必要がある。", a:true,
+      exp:"そのお金はもともと自分のものではありません。預かって取り分け、期限内に納めましょう。"},
+    {t:"fib", q:"事業に関わる法律やルールを守ることを「___」という。", bank:["コンプライアンス","マーケティング","ブランディング","ネットワーキング"], a:"コンプライアンス",
+      exp:"許可・税金・安全ルールなどを守る（コンプライアンス）ことで、事業はトラブルを避けられます。"},
+  ]},
+]},
 ],
 };
 
@@ -1181,6 +1335,19 @@ en:{
   "contribution margin":"The money left from one sale after its variable costs.",
   "unit economics":"The profit or loss on a single unit sold.",
   "variable cost":"A cost that changes with each unit you make.",
+  "inventory":"The stock of products and materials a business has on hand.",
+  "supplier":"A business you buy materials or products from.",
+  "supply chain":"The whole path your materials take from supplier to finished product.",
+  "lead time":"How long a supplier takes to deliver after you place an order.",
+  "reorder point":"The stock level that signals it is time to order more.",
+  "contractor":"Someone hired for specific work who handles their own taxes and tools.",
+  "onboarding":"Welcoming and training a new hire so they become productive.",
+  "payroll":"The system for paying employees and handling tax withholding.",
+  "delegation":"Handing tasks to others so you can focus on what only you can do.",
+  "customer service":"How you help and support customers before and after a sale.",
+  "business license":"Official government permission to operate your business legally.",
+  "sales tax":"Tax you collect from customers and pass on to the government.",
+  "compliance":"Following the laws and rules that apply to your business.",
 },
 es:{
   "ingresos":"Todo el dinero que un negocio gana por sus ventas, antes de restar costos.",
@@ -1266,6 +1433,19 @@ es:{
   "margen de contribución":"El dinero que queda de una venta tras sus costos variables.",
   "economía por unidad":"La ganancia o pérdida de una sola unidad vendida.",
   "costo variable":"Un costo que cambia con cada unidad que produces.",
+  "inventario":"Las existencias de productos y materiales que tiene un negocio.",
+  "proveedor":"Un negocio al que le compras materiales o productos.",
+  "cadena de suministro":"Todo el recorrido de tus materiales, del proveedor al producto final.",
+  "plazo de entrega":"Cuánto tarda un proveedor en entregar tras un pedido.",
+  "punto de pedido":"El nivel de stock que indica que toca pedir más.",
+  "contratista":"Persona contratada para un trabajo específico que maneja sus propios impuestos.",
+  "incorporación":"Dar la bienvenida y capacitar a un nuevo empleado (onboarding).",
+  "nómina":"El sistema para pagar a los empleados y gestionar las retenciones.",
+  "delegar":"Pasar tareas a otros para enfocarte en lo que solo tú puedes hacer.",
+  "servicio al cliente":"Cómo ayudas y apoyas a los clientes antes y después de una venta.",
+  "licencia comercial":"Permiso oficial del gobierno para operar tu negocio legalmente.",
+  "impuesto sobre las ventas":"Impuesto que cobras a los clientes y entregas al gobierno.",
+  "cumplimiento":"Seguir las leyes y normas que aplican a tu negocio.",
 },
 ja:{
   "売上":"商品やサービスの販売で得たお金の総額。コストを引く前の金額。",
@@ -1352,6 +1532,19 @@ ja:{
   "限界利益":"1回の販売から変動費を引いて残るお金。",
   "ユニットエコノミクス":"1個売れたときの利益または損失。",
   "変動費":"作る数量に応じて変わる費用。",
+  "在庫":"事業が手元に持っている製品や材料のストック。",
+  "仕入先":"材料や製品を買う相手の事業者。",
+  "サプライチェーン":"材料が仕入先から完成品に至るまでの一連の流れ。",
+  "リードタイム":"発注してから届くまでにかかる時間。",
+  "発注点":"新たに発注するきっかけになる在庫量。",
+  "業務委託":"特定の仕事のために依頼する働き方。税金や道具は本人が管理する。",
+  "委任":"自分にしかできないことに集中するため、仕事を他者に任せること。",
+  "オンボーディング":"新しい人を迎え入れ、戦力になるよう教育する流れ。",
+  "給与計算":"従業員への賃金支払いと源泉徴収を処理するしくみ。",
+  "顧客サービス":"販売の前後に顧客を助け、支えること。",
+  "事業許可":"事業を合法的に営むための、政府からの正式な許可。",
+  "消費税":"顧客から預かり、政府に納める税。売上税ともいう。",
+  "コンプライアンス":"事業に関わる法律やルールを守ること。",
 },
 };
 
@@ -1362,6 +1555,21 @@ const ACH_DEFS = [
   {id:"xp100", icon:"💯"},
   {id:"streak3", icon:"🔥"},
 ];
+
+const RANKS = [
+  {key:"intern", min:0, icon:"🐣"},
+  {key:"associate", min:50, icon:"📎"},
+  {key:"manager", min:150, icon:"📊"},
+  {key:"director", min:300, icon:"🧭"},
+  {key:"vp", min:500, icon:"🚀"},
+  {key:"founder", min:800, icon:"👑"},
+];
+function rankFor(xp){
+  let i = 0;
+  for(let j=0;j<RANKS.length;j++){ if(xp >= RANKS[j].min) i = j; }
+  return { ...RANKS[i], next: RANKS[i+1] || null };
+}
+function lessonsDoneCount(s){ return Object.keys(s.done||{}).filter(k=>s.done[k]).length; }
 
 /* ================= State ================= */
 const KEY = "bizlingo-v1";
@@ -1376,6 +1584,7 @@ function load(){
 }
 function normalize(s){
   s.lang = (s.lang && I18N[s.lang]) ? s.lang : null;
+  s.name = (typeof s.name === "string") ? s.name : "";
   s.xp = s.xp|0; s.streak = s.streak|0;
   s.lastActive = s.lastActive || null;
   s.hearts = (s.hearts==null) ? 5 : s.hearts;
@@ -1511,6 +1720,88 @@ function bumpStreak(){
   if(state.streak >= 3) grantAch("streak3");
 }
 
+/* ================= Sharing ================= */
+function scoreParam(s){
+  const data = { n:(s.name||"").slice(0,24), x:s.xp, t:s.streak, l:lessonsDoneCount(s), a:s.ach.length, g:s.lang||"en" };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+function shareURL(s){
+  return location.origin + location.pathname + "?score=" + encodeURIComponent(scoreParam(s));
+}
+function decodeScore(p){
+  const d = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(p)))));
+  return { name:(d.n||"").slice(0,24), xp:d.x|0, streak:d.t|0, lessons:d.l|0, ach:d.a|0, lang:(d.g && I18N[d.g])?d.g:"en" };
+}
+function scoreCardHTML(lang, name, xp, streak, lessons, ach){
+  const ft = I18N[lang] || I18N.en;
+  const r = rankFor(xp);
+  const rn = ft.ranks[r.key];
+  const dispName = (name && name.trim()) ? name.trim() : "BizLingo 🦉";
+  return `<div class="scorecard-share">
+    <div class="sc-rank">${r.icon}</div>
+    <div class="sc-name">${esc(dispName)}</div>
+    <div class="sc-rk">${ft.flag} ${esc(rn)}</div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="n">⚡${xp}</div><div class="l">XP</div></div>
+      <div class="sc-stat"><div class="n">🔥${streak}</div><div class="l">${esc(ft.dayStreak)}</div></div>
+      <div class="sc-stat"><div class="n">📚${lessons}</div><div class="l">${esc(ft.lessonsDone)}</div></div>
+      <div class="sc-stat"><div class="n">🏆${ach}</div><div class="l">${esc(ft.achievements)}</div></div>
+    </div>
+  </div>`;
+}
+function openShare(){
+  const t = T();
+  const d = document.createElement("div"); d.className = "modal-back";
+  d.innerHTML = `<div class="modal">
+    <h2>📣 ${esc(t.shareTitle)}</h2>
+    <p style="margin-bottom:14px">${esc(t.shareSub)}</p>
+    <div id="sc-preview">${scoreCardHTML(state.lang, state.name, state.xp, state.streak, lessonsDoneCount(state), state.ach.length)}</div>
+    <input class="nameinput" id="sc-name" maxlength="24" placeholder="${esc(t.yourName)}" value="${esc(state.name||"")}">
+    <div class="row2">
+      <button class="btn" id="sc-do">${esc(t.shareBtn)}</button>
+      <button class="btn ghost" id="sc-copy">${esc(t.copyLink)}</button>
+      <button class="btn ghost" id="sc-close">✕</button>
+    </div>
+  </div>`;
+  document.body.appendChild(d);
+  const nameI = d.querySelector("#sc-name");
+  nameI.oninput = ()=>{
+    state.name = nameI.value;
+    d.querySelector("#sc-preview").innerHTML = scoreCardHTML(state.lang, state.name, state.xp, state.streak, lessonsDoneCount(state), state.ach.length);
+  };
+  const finalize = ()=>{ state.name = nameI.value.slice(0,24); save(); return shareURL(state); };
+  d.querySelector("#sc-do").onclick = async ()=>{
+    const url = finalize();
+    const rn = T().ranks[rankFor(state.xp).key];
+    const who = (state.name||"").trim() || "I";
+    const text = `${who} — ${rn} on BizLingo 🦉 · ⚡${state.xp} XP · 🔥${state.streak} · 📚${lessonsDoneCount(state)} ${T().lessonsDone}. ${T().shareSub}`;
+    try{
+      if(navigator.share){ await navigator.share({ title:"BizLingo", text, url }); }
+      else { await navigator.clipboard.writeText(url); toast(`<span style="font-size:20px">🔗</span><span>${esc(T().copied)}</span>`); }
+    }catch(e){}
+  };
+  d.querySelector("#sc-copy").onclick = async ()=>{
+    const url = finalize();
+    try{ await navigator.clipboard.writeText(url); }catch(e){}
+    toast(`<span style="font-size:20px">🔗</span><span>${esc(T().copied)}</span>`);
+  };
+  d.querySelector("#sc-close").onclick = ()=>d.remove();
+}
+function renderFriendCard(data){
+  const ft = I18N[data.lang] || I18N.en;
+  const who = (data.name && data.name.trim()) ? data.name.trim() : "A BizLingo learner";
+  app.innerHTML = `<div class="friendwrap">
+    <div style="font-size:28px; font-weight:900; color:var(--green); margin-bottom:6px">🦉 BizLingo</div>
+    <p style="color:var(--gray); font-weight:700; margin:0 0 16px"><b>${esc(who)}</b> ${esc(ft.friendIntro)}</p>
+    ${scoreCardHTML(data.lang, data.name, data.xp, data.streak, data.lessons, data.ach)}
+    <button class="btn" id="fc-go" style="margin-top:8px">${esc(ft.beatScore)} 🚀</button>
+  </div>`;
+  document.getElementById("fc-go").onclick = ()=>{
+    history.replaceState(null, "", location.pathname);
+    if(!state.lang) renderLangSelect(); else renderHome();
+  };
+}
+
 /* ================= Screens ================= */
 function renderLangSelect(){
   app.innerHTML = `
@@ -1551,6 +1842,21 @@ function renderHome(showWelcome){
     html += `<div class="card" style="display:flex;gap:14px;align-items:center;margin-bottom:6px">
       <span style="font-size:40px">🦉</span><div style="font-weight:700">${esc(t.welcome)}</div></div>`;
   }
+  {
+    const r = rankFor(state.xp);
+    const span = r.next ? (r.next.min - r.min) : 1;
+    const pct = r.next ? Math.min(100, Math.round(100*(state.xp - r.min)/span)) : 100;
+    const nextTxt = r.next ? `${Math.max(0, r.next.min - state.xp)} XP → ${esc(t.ranks[r.next.key])}` : esc(t.topRank);
+    html += `<div class="rankcard">
+      <div class="rk-ic">${r.icon}</div>
+      <div class="rk-body">
+        <div class="rk-title">${esc(t.rank)}: ${esc(t.ranks[r.key])}</div>
+        <div class="rk-bar"><div style="width:${pct}%"></div></div>
+        <div class="rk-sub">⚡ ${state.xp} XP · ${nextTxt}</div>
+      </div>
+      <button class="rk-share" id="sharebtn">📣 ${esc(t.shareBtn)}</button>
+    </div>`;
+  }
   U.forEach((unit, u)=>{
     html += `
     <div class="unit-banner" style="background:${unit.color}">
@@ -1578,6 +1884,7 @@ function renderHome(showWelcome){
   </div>`;
   app.innerHTML = html;
   document.getElementById("langbtn").onclick = renderLangSelect;
+  const sb = document.getElementById("sharebtn"); if(sb) sb.onclick = openShare;
   app.querySelectorAll(".node:not(.locked)").forEach(b=>b.onclick = ()=>{
     const [u,l] = b.dataset.key.split("-").map(Number);
     startLesson(u,l);
@@ -1823,7 +2130,13 @@ function finishLesson(){
 }
 
 /* ================= Boot ================= */
-if(!state.lang) renderLangSelect(); else renderHome();
+(function boot(){
+  const sc = new URLSearchParams(location.search).get("score");
+  if(sc){
+    try{ renderFriendCard(decodeScore(sc)); return; }catch(e){}
+  }
+  if(!state.lang) renderLangSelect(); else renderHome();
+})();
 
 /* ================= PWA: offline support ================= */
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
