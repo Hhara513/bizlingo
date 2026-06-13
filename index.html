@@ -227,6 +227,96 @@
   .nameinput{width:100%; box-sizing:border-box; border:2px solid var(--line); border-radius:12px; padding:11px 13px; font-size:15px; font-weight:600; margin-bottom:14px;}
   .modal .row2{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
   .friendwrap{padding-top:6vh; text-align:center;}
+
+  /* ---------- animated anime cat ---------- */
+  .catstage{
+    position:relative; width:240px; height:190px; margin:0 auto;
+    border-radius:24px; overflow:hidden;
+    background:linear-gradient(#eaf6ff 0%, #eaf6ff 62%, #d7ffb8 62%, #cdf7a8 100%);
+  }
+  .catsvg{position:absolute; left:50%; top:8px; width:200px; height:170px; transform:translateX(-50%);}
+  .cat-cap{
+    text-align:center; font-weight:800; font-size:15px; color:var(--gray);
+    margin:8px 0 0; min-height:20px;
+  }
+  /* line-art base */
+  .catsvg .body,.catsvg .head,.catsvg .ear,.catsvg .leg,.catsvg .tail{
+    fill:#fff; stroke:#3c3c3c; stroke-width:3; stroke-linejoin:round; stroke-linecap:round;
+  }
+  .catsvg .ear-in{fill:#ffb3c1;} .catsvg .cheek{fill:#ffd0db;}
+  .catsvg .nose{fill:#ff8593; stroke:#3c3c3c; stroke-width:1.5; stroke-linejoin:round;}
+  .catsvg .pupil{fill:#3c3c3c;} .catsvg .glint{fill:#fff;}
+  .catsvg .eyeline,.catsvg .mouth,.catsvg .whisker{fill:none; stroke:#3c3c3c; stroke-width:2.4; stroke-linecap:round;}
+  .catsvg .whisker{stroke-width:1.8;}
+  .catsvg .mouthyawn{fill:#e36a86; stroke:#3c3c3c; stroke-width:1.5;}
+  .catsvg .eyes-closed,.catsvg .mouthyawn,.catsvg .zzz,.catsvg .yarn,.catsvg .bush{opacity:0;}
+  .catsvg .yarn{fill:#ff7b54; stroke:#c44; stroke-width:1.5;}
+  .catsvg .yarnline{fill:none; stroke:#fff; stroke-width:1.2; opacity:.8;}
+  .catsvg .bush{fill:#58cc02; stroke:#3c3c3c; stroke-width:3;}
+
+  /* transform pivots */
+  .catsvg .cat-inner{transform-box:fill-box; transform-origin:center;}
+  .catsvg .tail{transform-box:fill-box; transform-origin:18% 88%;}
+  .catsvg .legFL,.catsvg .legFR,.catsvg .legBL,.catsvg .legBR{transform-box:fill-box; transform-origin:50% 6%;}
+  .catsvg .breathe{transform-box:fill-box; transform-origin:center;}
+  .catsvg .zzz{transform-box:fill-box; transform-origin:center;}
+
+  /* idle blink (when not napping/yawning) */
+  .cat:not(.nap):not(.yawn) .eyes-open{animation:blinkO 4.2s infinite;}
+  .cat:not(.nap):not(.yawn) .eyes-closed{animation:blinkC 4.2s infinite;}
+  @keyframes blinkO{0%,92%,100%{opacity:1}94%,98%{opacity:0}}
+  @keyframes blinkC{0%,92%,100%{opacity:0}94%,98%{opacity:1}}
+  /* eyes shut while napping / yawning */
+  .cat.nap .eyes-open,.cat.yawn .eyes-open{opacity:0;}
+  .cat.nap .eyes-closed,.cat.yawn .eyes-closed{opacity:1;}
+
+  /* SIT — gentle bob + tail sway */
+  .cat.sit .cat-inner{animation:bob 2.4s ease-in-out infinite;}
+  .cat.sit .tail{animation:tail 2.2s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  @keyframes tail{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(16deg)}}
+
+  /* WALK — legs swing + body bob, ambles side to side */
+  .cat.walk .cat-inner{animation:stroll 5s ease-in-out infinite;}
+  .cat.walk .legFL,.cat.walk .legBR{animation:legA .5s ease-in-out infinite;}
+  .cat.walk .legFR,.cat.walk .legBL{animation:legB .5s ease-in-out infinite;}
+  .cat.walk .tail{animation:tail 1s ease-in-out infinite;}
+  @keyframes stroll{0%{transform:translateX(-46px)}50%{transform:translateX(46px) scaleX(-1)}50.01%{transform:translateX(46px) scaleX(-1)}100%{transform:translateX(-46px)}}
+  @keyframes legA{0%,100%{transform:rotate(16deg)}50%{transform:rotate(-16deg)}}
+  @keyframes legB{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(16deg)}}
+
+  /* CHASE — fast legs, lean forward, yarn rolls ahead */
+  .cat.chase .cat-inner{animation:chaseBob .26s ease-in-out infinite; transform:rotate(-8deg);}
+  .cat.chase .legFL,.cat.chase .legBR{animation:legA .26s linear infinite;}
+  .cat.chase .legFR,.cat.chase .legBL{animation:legB .26s linear infinite;}
+  .cat.chase .yarn{opacity:1; animation:yarnRoll 1.6s linear infinite;}
+  @keyframes chaseBob{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-8deg) translateY(-3px)}}
+  @keyframes yarnRoll{0%{transform:translateX(40px) rotate(0)}100%{transform:translateX(-30px) rotate(-540deg)}}
+
+  /* ROLL — tumbles over */
+  .cat.roll .cat-inner{animation:rollover 1.7s ease-in-out infinite;}
+  @keyframes rollover{0%{transform:translateX(-26px) rotate(0)}100%{transform:translateX(26px) rotate(360deg)}}
+
+  /* YAWN — head tilts, big mouth opens, eyes squint */
+  .cat.yawn .head{animation:yawnHead 3.2s ease-in-out;}
+  .cat.yawn .mouthyawn{animation:yawnMouth 3.2s ease-in-out;}
+  .cat.yawn .mouth{opacity:0;}
+  @keyframes yawnHead{0%,100%{transform:rotate(0)}25%,70%{transform:rotate(-7deg)}}
+  @keyframes yawnMouth{0%,12%,92%,100%{opacity:0; transform:scale(.3)}30%,70%{opacity:1; transform:scale(1)}}
+
+  /* NAP — lies down, breathes, Zzz floats */
+  .cat.nap .cat-inner{transform:rotate(9deg) translateY(10px);}
+  .cat.nap .breathe{animation:breathe 2.6s ease-in-out infinite;}
+  .cat.nap .legFL,.cat.nap .legFR,.cat.nap .legBL,.cat.nap .legBR{transform:scaleY(.45);}
+  .cat.nap .tail{transform:rotate(28deg);}
+  .cat.nap .zzz{opacity:1; animation:zzz 2.6s ease-out infinite;}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  @keyframes zzz{0%{opacity:0; transform:translate(0,0) scale(.6)}30%{opacity:1}100%{opacity:0; transform:translate(14px,-26px) scale(1.1)}}
+
+  /* HIDE — ducks behind the bush, peeks, ducks again */
+  .cat.hide .bush{opacity:1;}
+  .cat.hide .cat-inner{animation:hide 4.4s ease-in-out;}
+  @keyframes hide{0%{transform:translateY(0)}22%,100%{transform:translateY(78px)}55%{transform:translateY(40px)}78%{transform:translateY(78px)}}
 </style>
 </head>
 <body>
@@ -1802,11 +1892,95 @@ function renderFriendCard(data){
   };
 }
 
+/* ================= Animated mascot cat ================= */
+const CAT_MOVES = {
+  en:{sit:"just chilling 🐾", walk:"walking around 🐾", yawn:"yawning 🥱", roll:"rolling around 🌀", chase:"chasing the yarn 🧶", nap:"napping 😴", hide:"hiding 🙈"},
+  es:{sit:"relajándose 🐾", walk:"paseando 🐾", yawn:"bostezando 🥱", roll:"rodando 🌀", chase:"persiguiendo el ovillo 🧶", nap:"durmiendo la siesta 😴", hide:"escondiéndose 🙈"},
+  ja:{sit:"のんびり中 🐾", walk:"おさんぽ 🐾", yawn:"あくび 🥱", roll:"ごろごろ 🌀", chase:"毛糸を追いかけ中 🧶", nap:"おひるね 😴", hide:"かくれんぼ 🙈"},
+};
+function catStageHTML(){
+  return `<div class="catstage">
+    <svg class="cat catsvg sit" viewBox="0 0 200 170" aria-label="BizLingo cat">
+      <g class="cat-inner">
+        <!-- bush (hide prop), drawn behind so cat can duck below the stage -->
+        <path class="tail" d="M132,118 C166,112 168,72 142,62 C156,78 146,110 124,110 Z"/>
+        <g class="legs">
+          <rect class="leg legBL" x="78"  y="128" width="13" height="26" rx="6"/>
+          <rect class="leg legBR" x="109" y="128" width="13" height="26" rx="6"/>
+          <rect class="leg legFL" x="86"  y="132" width="13" height="26" rx="6"/>
+          <rect class="leg legFR" x="101" y="132" width="13" height="26" rx="6"/>
+        </g>
+        <g class="breathe">
+          <ellipse class="body" cx="100" cy="112" rx="40" ry="30"/>
+          <g class="head">
+            <path class="ear" d="M74,60 L62,24 L98,50 Z"/>
+            <path class="ear" d="M126,60 L138,24 L102,50 Z"/>
+            <path class="ear-in" d="M76,56 L69,34 L91,50 Z"/>
+            <path class="ear-in" d="M124,56 L131,34 L109,50 Z"/>
+            <circle class="head" cx="100" cy="72" r="37"/>
+            <ellipse class="cheek" cx="76" cy="82" rx="6" ry="4"/>
+            <ellipse class="cheek" cx="124" cy="82" rx="6" ry="4"/>
+            <g class="eyes-open">
+              <ellipse class="pupil" cx="86" cy="72" rx="7" ry="10"/>
+              <ellipse class="pupil" cx="114" cy="72" rx="7" ry="10"/>
+              <circle class="glint" cx="83" cy="68" r="2.6"/>
+              <circle class="glint" cx="111" cy="68" r="2.6"/>
+              <circle class="glint" cx="88" cy="75" r="1.4"/>
+              <circle class="glint" cx="116" cy="75" r="1.4"/>
+            </g>
+            <g class="eyes-closed">
+              <path class="eyeline" d="M79,73 Q86,79 93,73"/>
+              <path class="eyeline" d="M107,73 Q114,79 121,73"/>
+            </g>
+            <path class="nose" d="M95,84 L105,84 L100,90 Z"/>
+            <path class="mouth" d="M100,90 Q94,96 89,92 M100,90 Q106,96 111,92"/>
+            <ellipse class="mouthyawn" cx="100" cy="94" rx="7" ry="9"/>
+            <g class="whiskers">
+              <path class="whisker" d="M72,86 L50,82"/>
+              <path class="whisker" d="M72,90 L48,90"/>
+              <path class="whisker" d="M72,94 L50,99"/>
+              <path class="whisker" d="M128,86 L150,82"/>
+              <path class="whisker" d="M128,90 L152,90"/>
+              <path class="whisker" d="M128,94 L150,99"/>
+            </g>
+          </g>
+        </g>
+        <g class="zzz">
+          <text x="138" y="52" font-size="14" font-weight="800" fill="#1cb0f6">z</text>
+          <text x="148" y="42" font-size="18" font-weight="800" fill="#1cb0f6">Z</text>
+        </g>
+      </g>
+      <g class="yarn">
+        <circle cx="158" cy="150" r="11"/>
+        <path class="yarnline" d="M150,146 Q158,150 166,146 M150,154 Q158,150 166,154 M154,142 Q158,150 154,158 M162,142 Q158,150 162,158"/>
+      </g>
+      <path class="bush" d="M0,170 Q14,140 34,150 Q40,128 64,140 Q78,126 96,142 Q112,130 124,146 Q150,134 160,154 Q184,144 200,164 L200,170 Z"/>
+    </svg>
+    <div class="cat-cap"></div>
+  </div>`;
+}
+function runCatShow(stage, lang){
+  if(!stage) return;
+  const moves = CAT_MOVES[lang] || CAT_MOVES.en;
+  const order = ["sit","walk","yawn","roll","chase","nap","hide"];
+  const dur = {sit:3200, walk:5000, yawn:3300, roll:3600, chase:5000, nap:5500, hide:4500};
+  const cat = stage.querySelector(".cat"), cap = stage.querySelector(".cat-cap");
+  let i = 0;
+  (function step(){
+    if(!document.body.contains(stage)) return; // screen changed — stop the loop
+    const m = order[i % order.length];
+    cat.setAttribute("class", "cat catsvg " + m);
+    cap.textContent = moves[m];
+    i++;
+    setTimeout(step, dur[m]);
+  })();
+}
+
 /* ================= Screens ================= */
 function renderLangSelect(){
   app.innerHTML = `
     <div class="langselect">
-      <div class="mascot-big">🐱</div>
+      ${catStageHTML()}
       <h1>BizLingo</h1>
       <p>Learn business the fun way · Aprende negocios jugando · 楽しくビジネスを学ぼう</p>
       <div class="langgrid">
@@ -1816,6 +1990,7 @@ function renderLangSelect(){
           </button>`).join("")}
       </div>
     </div>`;
+  runCatShow(app.querySelector(".catstage"), state.lang || "en");
   app.querySelectorAll(".langopt").forEach(b=>b.onclick = ()=>{
     state.lang = b.dataset.lang; save(); renderHome(true);
   });
