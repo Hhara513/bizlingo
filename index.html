@@ -240,16 +240,22 @@
     margin:8px 0 0; min-height:20px;
   }
   /* line-art base */
-  .catsvg .body,.catsvg .head,.catsvg .ear,.catsvg .leg,.catsvg .tail{
-    fill:#fff; stroke:#3c3c3c; stroke-width:3; stroke-linejoin:round; stroke-linecap:round;
+  .catsvg .body,.catsvg .head,.catsvg .ear,.catsvg .leg,.catsvg .tailshape{
+    fill:#eaa45a; stroke:#6b4226; stroke-width:3; stroke-linejoin:round; stroke-linecap:round;
   }
-  .catsvg .ear-in{fill:#ffb3c1;} .catsvg .cheek{fill:#ffd0db;}
-  .catsvg .nose{fill:#ff8593; stroke:#3c3c3c; stroke-width:1.5; stroke-linejoin:round;}
-  .catsvg .pupil{fill:#3c3c3c;} .catsvg .glint{fill:#fff;}
-  .catsvg .eyeline,.catsvg .mouth,.catsvg .whisker{fill:none; stroke:#3c3c3c; stroke-width:2.4; stroke-linecap:round;}
+  .catsvg .ear-tip{fill:#d98a43; stroke:#6b4226; stroke-width:2.5; stroke-linejoin:round;}
+  .catsvg .ear-in{fill:#eaa0ab;}
+  .catsvg .belly,.catsvg .muzzle{fill:#f9efd9; stroke:none;}
+  .catsvg .cheek{fill:#f0a878; opacity:.55;}
+  .catsvg .stripe{fill:none; stroke:#c2772f; stroke-width:5; stroke-linecap:round; stroke-linejoin:round;}
+  .catsvg .shadow{fill:rgba(80,50,20,.13);}
+  .catsvg .nose{fill:#c06a6a; stroke:#6b4226; stroke-width:1.2; stroke-linejoin:round;}
+  .catsvg .pupil{fill:#4a2f1c;} .catsvg .glint{fill:#fff;}
+  .catsvg .eyeline,.catsvg .mouth,.catsvg .whisker{fill:none; stroke:#6b4226; stroke-width:3; stroke-linecap:round; stroke-linejoin:round;}
   .catsvg .whisker{stroke-width:1.8;}
-  .catsvg .mouthyawn{fill:#e36a86; stroke:#3c3c3c; stroke-width:1.5;}
-  .catsvg .eyes-closed,.catsvg .mouthyawn,.catsvg .zzz,.catsvg .yarn,.catsvg .bush{opacity:0;}
+  .catsvg .mouthyawn{fill:#cf6a6a; stroke:#6b4226; stroke-width:1.5;}
+  .catsvg .eyes-open,.catsvg .mouthyawn,.catsvg .zzz,.catsvg .yarn,.catsvg .bush{opacity:0;}
+  .catsvg .eyes-closed{opacity:1;}
   .catsvg .yarn{fill:#ff7b54; stroke:#c44; stroke-width:1.5;}
   .catsvg .yarnline{fill:none; stroke:#fff; stroke-width:1.2; opacity:.8;}
   .catsvg .bush{fill:#58cc02; stroke:#3c3c3c; stroke-width:3;}
@@ -261,14 +267,9 @@
   .catsvg .breathe{transform-box:fill-box; transform-origin:center;}
   .catsvg .zzz{transform-box:fill-box; transform-origin:center;}
 
-  /* idle blink (when not napping/yawning) */
-  .cat:not(.nap):not(.yawn) .eyes-open{animation:blinkO 4.2s infinite;}
-  .cat:not(.nap):not(.yawn) .eyes-closed{animation:blinkC 4.2s infinite;}
-  @keyframes blinkO{0%,92%,100%{opacity:1}94%,98%{opacity:0}}
-  @keyframes blinkC{0%,92%,100%{opacity:0}94%,98%{opacity:1}}
-  /* eyes shut while napping / yawning */
-  .cat.nap .eyes-open,.cat.yawn .eyes-open{opacity:0;}
-  .cat.nap .eyes-closed,.cat.yawn .eyes-closed{opacity:1;}
+  /* default: content closed-eye smile; eyes pop wide open only when excited (chase) */
+  .cat.chase .eyes-open{opacity:1;}
+  .cat.chase .eyes-closed{opacity:0;}
 
   /* SIT — gentle bob + tail sway */
   .cat.sit .cat-inner{animation:bob 2.4s ease-in-out infinite;}
@@ -1901,58 +1902,70 @@ const CAT_MOVES = {
 function catStageHTML(){
   return `<div class="catstage">
     <svg class="cat catsvg sit" viewBox="0 0 200 170" aria-label="BizLingo cat">
+      <ellipse class="shadow" cx="98" cy="156" rx="58" ry="9"/>
       <g class="cat-inner">
-        <!-- bush (hide prop), drawn behind so cat can duck below the stage -->
-        <path class="tail" d="M132,118 C166,112 168,72 142,62 C156,78 146,110 124,110 Z"/>
+        <!-- long striped tail, curling up to the right (behind body) -->
+        <g class="tail">
+          <path class="tailshape" d="M120,118 C150,126 184,120 188,86 C190,68 178,56 168,62 C178,72 176,98 150,106 C136,110 126,112 120,118 Z"/>
+          <path class="stripe" d="M179,62 q5,5 7,13"/>
+          <path class="stripe" d="M170,74 q8,2 12,9"/>
+          <path class="stripe" d="M156,90 q9,1 14,6"/>
+          <path class="stripe" d="M140,101 q8,0 13,4"/>
+        </g>
         <g class="legs">
-          <rect class="leg legBL" x="78"  y="128" width="13" height="26" rx="6"/>
-          <rect class="leg legBR" x="109" y="128" width="13" height="26" rx="6"/>
-          <rect class="leg legFL" x="86"  y="132" width="13" height="26" rx="6"/>
-          <rect class="leg legFR" x="101" y="132" width="13" height="26" rx="6"/>
+          <rect class="leg legBL" x="74"  y="126" width="15" height="28" rx="7"/>
+          <rect class="leg legBR" x="110" y="126" width="15" height="28" rx="7"/>
+          <rect class="leg legFL" x="84"  y="132" width="15" height="26" rx="7"/>
+          <rect class="leg legFR" x="100" y="132" width="15" height="26" rx="7"/>
         </g>
         <g class="breathe">
-          <ellipse class="body" cx="100" cy="112" rx="40" ry="30"/>
+          <ellipse class="body" cx="100" cy="110" rx="42" ry="32"/>
+          <path class="stripe" d="M118,84 q11,6 13,17"/>
+          <path class="stripe" d="M128,98 q9,7 9,18"/>
+          <ellipse class="belly" cx="98" cy="122" rx="26" ry="21"/>
           <g class="head">
-            <path class="ear" d="M74,60 L62,24 L98,50 Z"/>
-            <path class="ear" d="M126,60 L138,24 L102,50 Z"/>
-            <path class="ear-in" d="M76,56 L69,34 L91,50 Z"/>
-            <path class="ear-in" d="M124,56 L131,34 L109,50 Z"/>
-            <circle class="head" cx="100" cy="72" r="37"/>
-            <ellipse class="cheek" cx="76" cy="82" rx="6" ry="4"/>
-            <ellipse class="cheek" cx="124" cy="82" rx="6" ry="4"/>
-            <g class="eyes-open">
-              <ellipse class="pupil" cx="86" cy="72" rx="7" ry="10"/>
-              <ellipse class="pupil" cx="114" cy="72" rx="7" ry="10"/>
-              <circle class="glint" cx="83" cy="68" r="2.6"/>
-              <circle class="glint" cx="111" cy="68" r="2.6"/>
-              <circle class="glint" cx="88" cy="75" r="1.4"/>
-              <circle class="glint" cx="116" cy="75" r="1.4"/>
-            </g>
+            <path class="ear" d="M72,58 L60,22 L98,48 Z"/>
+            <path class="ear" d="M128,58 L140,22 L102,48 Z"/>
+            <path class="ear-tip" d="M66,38 L60,22 L80,33 Z"/>
+            <path class="ear-tip" d="M134,38 L140,22 L120,33 Z"/>
+            <path class="ear-in" d="M75,52 L69,35 L90,48 Z"/>
+            <path class="ear-in" d="M125,52 L131,35 L110,48 Z"/>
+            <circle class="head" cx="100" cy="70" r="38"/>
+            <path class="stripe" d="M100,40 L100,30 M89,42 L85,32 M111,42 L115,32"/>
+            <path class="stripe" d="M68,62 q-9,-2 -13,2 M70,71 q-10,0 -14,4"/>
+            <path class="stripe" d="M132,62 q9,-2 13,2 M130,71 q10,0 14,4"/>
+            <ellipse class="muzzle" cx="100" cy="86" rx="31" ry="17"/>
+            <ellipse class="cheek" cx="74" cy="80" rx="6.5" ry="4.5"/>
+            <ellipse class="cheek" cx="126" cy="80" rx="6.5" ry="4.5"/>
             <g class="eyes-closed">
-              <path class="eyeline" d="M79,73 Q86,79 93,73"/>
-              <path class="eyeline" d="M107,73 Q114,79 121,73"/>
+              <path class="eyeline" d="M80,75 Q88,66 96,75"/>
+              <path class="eyeline" d="M104,75 Q112,66 120,75"/>
             </g>
-            <path class="nose" d="M95,84 L105,84 L100,90 Z"/>
-            <path class="mouth" d="M100,90 Q94,96 89,92 M100,90 Q106,96 111,92"/>
-            <ellipse class="mouthyawn" cx="100" cy="94" rx="7" ry="9"/>
+            <g class="eyes-open">
+              <ellipse class="pupil" cx="88" cy="72" rx="7" ry="9"/>
+              <ellipse class="pupil" cx="112" cy="72" rx="7" ry="9"/>
+              <circle class="glint" cx="85" cy="68" r="2.6"/>
+              <circle class="glint" cx="109" cy="68" r="2.6"/>
+            </g>
+            <path class="nose" d="M95,85 L105,85 L100,91 Z"/>
+            <path class="mouth" d="M100,91 Q95,96 90,93 M100,91 Q105,96 110,93"/>
+            <ellipse class="mouthyawn" cx="100" cy="95" rx="7" ry="9"/>
             <g class="whiskers">
-              <path class="whisker" d="M72,86 L50,82"/>
-              <path class="whisker" d="M72,90 L48,90"/>
-              <path class="whisker" d="M72,94 L50,99"/>
-              <path class="whisker" d="M128,86 L150,82"/>
-              <path class="whisker" d="M128,90 L152,90"/>
-              <path class="whisker" d="M128,94 L150,99"/>
+              <path class="whisker" d="M70,84 L48,80"/>
+              <path class="whisker" d="M70,89 L46,89"/>
+              <path class="whisker" d="M130,84 L152,80"/>
+              <path class="whisker" d="M130,89 L154,89"/>
             </g>
           </g>
         </g>
         <g class="zzz">
-          <text x="138" y="52" font-size="14" font-weight="800" fill="#1cb0f6">z</text>
-          <text x="148" y="42" font-size="18" font-weight="800" fill="#1cb0f6">Z</text>
+          <text x="140" y="50" font-size="14" font-weight="800" fill="#1cb0f6">z</text>
+          <text x="150" y="40" font-size="18" font-weight="800" fill="#1cb0f6">Z</text>
         </g>
       </g>
       <g class="yarn">
-        <circle cx="158" cy="150" r="11"/>
-        <path class="yarnline" d="M150,146 Q158,150 166,146 M150,154 Q158,150 166,154 M154,142 Q158,150 154,158 M162,142 Q158,150 162,158"/>
+        <circle cx="160" cy="150" r="11"/>
+        <path class="yarnline" d="M152,146 Q160,150 168,146 M152,154 Q160,150 168,154 M156,142 Q160,150 156,158 M164,142 Q160,150 164,158"/>
       </g>
       <path class="bush" d="M0,170 Q14,140 34,150 Q40,128 64,140 Q78,126 96,142 Q112,130 124,146 Q150,134 160,154 Q184,144 200,164 L200,170 Z"/>
     </svg>
