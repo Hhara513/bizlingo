@@ -69,14 +69,19 @@
     filter:drop-shadow(0 6px 8px rgba(80,50,20,.18)); animation:catpop .6s ease-out;}
   @keyframes catpop{0%{transform:scale(.4); opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1)}}
   .langselect h1{font-size:30px; margin:14px 0 6px;}
-  .langselect p{color:var(--gray); margin:0 0 26px; font-size:17px;}
+  .langselect p{color:#356b1c; margin:0 0 24px; font-weight:800; white-space:nowrap;
+    font-size:clamp(11px, 2.3vw, 15px); text-shadow:0 1px 2px rgba(255,255,255,.6);}
   .langgrid{display:flex; flex-direction:column; gap:12px; max-width:360px; margin:0 auto;}
   .langopt{
     display:flex; align-items:center; gap:14px; padding:16px 20px; font-size:19px; font-weight:800;
     background:#fff; border:2px solid var(--line); border-bottom-width:4px; border-radius:16px; cursor:pointer;
   }
-  .langopt:hover{background:#f0f9ff; border-color:var(--blue);}
+  .langopt:hover{filter:brightness(.96); border-color:var(--blue);}
   .langopt .flag{font-size:30px;}
+  /* flag-themed button backgrounds */
+  .langopt[data-lang="en"]{background:linear-gradient(120deg,#cfe0ff 0%,#ffffff 50%,#ffd4d8 100%);}
+  .langopt[data-lang="es"]{background:linear-gradient(180deg,#ffc9bf 0%,#ffc9bf 22%,#ffeeb3 22%,#ffeeb3 78%,#ffc9bf 78%,#ffc9bf 100%);}
+  .langopt[data-lang="ja"]{background:#ffffff radial-gradient(circle at 88% 50%, #ffc2c2 0 22px, rgba(255,194,194,0) 23px);}
 
   /* ---------- home / path ---------- */
   .unit-banner{
@@ -248,7 +253,7 @@
     background:linear-gradient(180deg, #9fdcff 0%, #bfeaff 25%, #d6f4ad 31%, #b4e584 100%);
     background-attachment:fixed;
   }
-  body.skybg .langselect p{color:#5f7a3f;}
+  body.skybg .langselect p{color:#2f6b16;}
   .catsvg{position:absolute; left:50%; top:8px; width:200px; height:170px; transform:translateX(-50%);}
   .cat-cap{
     text-align:center; font-weight:800; font-size:15px; color:var(--gray);
