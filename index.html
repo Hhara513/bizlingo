@@ -1736,7 +1736,7 @@ function scoreCardHTML(lang, name, xp, streak, lessons, ach){
   const ft = I18N[lang] || I18N.en;
   const r = rankFor(xp);
   const rn = ft.ranks[r.key];
-  const dispName = (name && name.trim()) ? name.trim() : "BizLingo 🦉";
+  const dispName = (name && name.trim()) ? name.trim() : "BizLingo 🐱";
   return `<div class="scorecard-share">
     <div class="sc-rank">${r.icon}</div>
     <div class="sc-name">${esc(dispName)}</div>
@@ -1774,7 +1774,7 @@ function openShare(){
     const url = finalize();
     const rn = T().ranks[rankFor(state.xp).key];
     const who = (state.name||"").trim() || "I";
-    const text = `${who} — ${rn} on BizLingo 🦉 · ⚡${state.xp} XP · 🔥${state.streak} · 📚${lessonsDoneCount(state)} ${T().lessonsDone}. ${T().shareSub}`;
+    const text = `${who} — ${rn} on BizLingo 🐱 · ⚡${state.xp} XP · 🔥${state.streak} · 📚${lessonsDoneCount(state)} ${T().lessonsDone}. ${T().shareSub}`;
     try{
       if(navigator.share){ await navigator.share({ title:"BizLingo", text, url }); }
       else { await navigator.clipboard.writeText(url); toast(`<span style="font-size:20px">🔗</span><span>${esc(T().copied)}</span>`); }
@@ -1791,7 +1791,7 @@ function renderFriendCard(data){
   const ft = I18N[data.lang] || I18N.en;
   const who = (data.name && data.name.trim()) ? data.name.trim() : "A BizLingo learner";
   app.innerHTML = `<div class="friendwrap">
-    <div style="font-size:28px; font-weight:900; color:var(--green); margin-bottom:6px">🦉 BizLingo</div>
+    <div style="font-size:28px; font-weight:900; color:var(--green); margin-bottom:6px">🐱 BizLingo</div>
     <p style="color:var(--gray); font-weight:700; margin:0 0 16px"><b>${esc(who)}</b> ${esc(ft.friendIntro)}</p>
     ${scoreCardHTML(data.lang, data.name, data.xp, data.streak, data.lessons, data.ach)}
     <button class="btn" id="fc-go" style="margin-top:8px">${esc(ft.beatScore)} 🚀</button>
@@ -1806,7 +1806,7 @@ function renderFriendCard(data){
 function renderLangSelect(){
   app.innerHTML = `
     <div class="langselect">
-      <div class="mascot-big">🦉</div>
+      <div class="mascot-big">🐱</div>
       <h1>BizLingo</h1>
       <p>Learn business the fun way · Aprende negocios jugando · 楽しくビジネスを学ぼう</p>
       <div class="langgrid">
@@ -1830,7 +1830,7 @@ function renderHome(showWelcome){
   }
   let html = `
     <header>
-      <div class="logo">🦉 BizLingo</div>
+      <div class="logo">🐱 BizLingo</div>
       <div class="stats">
         <span class="stat streak" title="${esc(t.dayStreak)}">🔥 ${state.streak}</span>
         <span class="stat xp">⚡ ${state.xp} XP</span>
@@ -1840,7 +1840,7 @@ function renderHome(showWelcome){
     </header>`;
   if(showWelcome){
     html += `<div class="card" style="display:flex;gap:14px;align-items:center;margin-bottom:6px">
-      <span style="font-size:40px">🦉</span><div style="font-weight:700">${esc(t.welcome)}</div></div>`;
+      <span style="font-size:40px">🐱</span><div style="font-weight:700">${esc(t.welcome)}</div></div>`;
   }
   {
     const r = rankFor(state.xp);
@@ -2086,7 +2086,7 @@ function showNoHearts(){
 function confirmQuit(){
   const t = T();
   const d = document.createElement("div"); d.className = "modal-back";
-  d.innerHTML = `<div class="modal"><div style="font-size:54px">🦉</div>
+  d.innerHTML = `<div class="modal"><div style="font-size:54px">🐱</div>
     <h2>${esc(t.quitTitle)}</h2><p>${esc(t.quitBody)}</p>
     <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
       <button class="btn" id="q-stay">${esc(t.stay)}</button>
@@ -2110,7 +2110,7 @@ function finishLesson(){
   sndWin(); confetti();
   app.innerHTML = `
     <div class="complete">
-      <div class="mascot-big">🦉🎉</div>
+      <div class="mascot-big">🐱🎉</div>
       <h1>${esc(t.done)}</h1>
       <p>${perfect ? "💎 " + esc(t.perfect) : esc(units()[L.u].lessons[L.l].name)}</p>
       <div class="scorecards">

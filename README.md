@@ -1,4 +1,4 @@
-# 🦉 BizLingo
+# 🐱 BizLingo
 
 A Duolingo-style game for learning business terms and concepts — built for new entrepreneurs.
 
