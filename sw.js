@@ -1,4 +1,4 @@
-const CACHE = "bizlingo-v7";
+const CACHE = "bizlingo-v8";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS = [
   "./icon-192.png",
   "./icon-512.png",
   "./apple-touch-icon.png",
+  "./mascot.png",
 ];
 
 self.addEventListener("install", e => {
