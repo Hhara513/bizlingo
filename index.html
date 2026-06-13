@@ -231,9 +231,14 @@
   /* ---------- animated anime cat ---------- */
   .catstage{
     position:relative; width:240px; height:190px; margin:0 auto;
-    border-radius:24px; overflow:hidden;
-    background:linear-gradient(#eaf6ff 0%, #eaf6ff 62%, #d7ffb8 62%, #cdf7a8 100%);
+    overflow:hidden; background:transparent;
   }
+  /* full-screen sky + lawn scene on the opening screen */
+  body.skybg{
+    background:linear-gradient(180deg, #9fdcff 0%, #bfeaff 25%, #d6f4ad 31%, #b4e584 100%);
+    background-attachment:fixed;
+  }
+  body.skybg .langselect p{color:#5f7a3f;}
   .catsvg{position:absolute; left:50%; top:8px; width:200px; height:170px; transform:translateX(-50%);}
   .cat-cap{
     text-align:center; font-weight:800; font-size:15px; color:var(--gray);
@@ -246,16 +251,19 @@
   .catsvg .ear-tip{fill:#d98a43; stroke:#6b4226; stroke-width:2.5; stroke-linejoin:round;}
   .catsvg .ear-in{fill:#eaa0ab;}
   .catsvg .belly,.catsvg .muzzle{fill:#f9efd9; stroke:none;}
-  .catsvg .cheek{fill:#f0a878; opacity:.55;}
+  .catsvg .cheek{fill:#f4938a; opacity:.5;}
   .catsvg .stripe{fill:none; stroke:#c2772f; stroke-width:5; stroke-linecap:round; stroke-linejoin:round;}
   .catsvg .shadow{fill:rgba(80,50,20,.13);}
   .catsvg .nose{fill:#c06a6a; stroke:#6b4226; stroke-width:1.2; stroke-linejoin:round;}
-  .catsvg .pupil{fill:#4a2f1c;} .catsvg .glint{fill:#fff;}
+  .catsvg .pupil{fill:#4a2f1c;} .catsvg .glint{fill:#fff;} .catsvg .glint2{fill:#fff; opacity:.85;}
+  .catsvg .eyewhite{fill:#fff; stroke:#6b4226; stroke-width:2;}
+  .catsvg .iris{fill:#e0992f;}
+  .catsvg .hi{fill:#fff; opacity:.28;} .catsvg .shade{fill:#6b4226; opacity:.08;}
   .catsvg .eyeline,.catsvg .mouth,.catsvg .whisker{fill:none; stroke:#6b4226; stroke-width:3; stroke-linecap:round; stroke-linejoin:round;}
   .catsvg .whisker{stroke-width:1.8;}
   .catsvg .mouthyawn{fill:#cf6a6a; stroke:#6b4226; stroke-width:1.5;}
-  .catsvg .eyes-open,.catsvg .mouthyawn,.catsvg .zzz,.catsvg .yarn,.catsvg .bush{opacity:0;}
-  .catsvg .eyes-closed{opacity:1;}
+  .catsvg .mouthyawn,.catsvg .zzz,.catsvg .yarn,.catsvg .bush{opacity:0;}
+  .catsvg .eyes-closed{opacity:0;} .catsvg .eyes-open{opacity:1;}
   .catsvg .yarn{fill:#ff7b54; stroke:#c44; stroke-width:1.5;}
   .catsvg .yarnline{fill:none; stroke:#fff; stroke-width:1.2; opacity:.8;}
   .catsvg .bush{fill:#58cc02; stroke:#3c3c3c; stroke-width:3;}
@@ -267,9 +275,13 @@
   .catsvg .breathe{transform-box:fill-box; transform-origin:center;}
   .catsvg .zzz{transform-box:fill-box; transform-origin:center;}
 
-  /* default: content closed-eye smile; eyes pop wide open only when excited (chase) */
-  .cat.chase .eyes-open{opacity:1;}
-  .cat.chase .eyes-closed{opacity:0;}
+  /* big sparkly eyes by default, with a gentle blink; eyes shut for nap & yawn */
+  .cat:not(.nap):not(.yawn) .eyes-open{animation:blinkO 5s infinite;}
+  .cat:not(.nap):not(.yawn) .eyes-closed{animation:blinkC 5s infinite;}
+  @keyframes blinkO{0%,94%,100%{opacity:1}96%,99%{opacity:0}}
+  @keyframes blinkC{0%,94%,100%{opacity:0}96%,99%{opacity:1}}
+  .cat.nap .eyes-open,.cat.yawn .eyes-open{opacity:0;}
+  .cat.nap .eyes-closed,.cat.yawn .eyes-closed{opacity:1;}
 
   /* SIT — gentle bob + tail sway */
   .cat.sit .cat-inner{animation:bob 2.4s ease-in-out infinite;}
@@ -1920,9 +1932,11 @@ function catStageHTML(){
         </g>
         <g class="breathe">
           <ellipse class="body" cx="100" cy="110" rx="42" ry="32"/>
+          <ellipse class="hi" cx="86" cy="96" rx="15" ry="8"/>
           <path class="stripe" d="M118,84 q11,6 13,17"/>
           <path class="stripe" d="M128,98 q9,7 9,18"/>
           <ellipse class="belly" cx="98" cy="122" rx="26" ry="21"/>
+          <ellipse class="shade" cx="100" cy="100" rx="24" ry="7"/>
           <g class="head">
             <path class="ear" d="M72,58 L60,22 L98,48 Z"/>
             <path class="ear" d="M128,58 L140,22 L102,48 Z"/>
@@ -1930,22 +1944,29 @@ function catStageHTML(){
             <path class="ear-tip" d="M134,38 L140,22 L120,33 Z"/>
             <path class="ear-in" d="M75,52 L69,35 L90,48 Z"/>
             <path class="ear-in" d="M125,52 L131,35 L110,48 Z"/>
-            <circle class="head" cx="100" cy="70" r="38"/>
-            <path class="stripe" d="M100,40 L100,30 M89,42 L85,32 M111,42 L115,32"/>
-            <path class="stripe" d="M68,62 q-9,-2 -13,2 M70,71 q-10,0 -14,4"/>
-            <path class="stripe" d="M132,62 q9,-2 13,2 M130,71 q10,0 14,4"/>
-            <ellipse class="muzzle" cx="100" cy="86" rx="31" ry="17"/>
-            <ellipse class="cheek" cx="74" cy="80" rx="6.5" ry="4.5"/>
-            <ellipse class="cheek" cx="126" cy="80" rx="6.5" ry="4.5"/>
+            <circle class="head" cx="100" cy="70" r="39"/>
+            <ellipse class="hi" cx="90" cy="48" rx="17" ry="8"/>
+            <path class="stripe" d="M100,38 L100,28 M88,41 L84,31 M112,41 L116,31"/>
+            <path class="stripe" d="M66,62 q-9,-2 -13,2 M68,71 q-10,0 -14,4"/>
+            <path class="stripe" d="M134,62 q9,-2 13,2 M132,71 q10,0 14,4"/>
+            <ellipse class="muzzle" cx="100" cy="88" rx="32" ry="17"/>
+            <ellipse class="cheek" cx="75" cy="83" rx="7.5" ry="5"/>
+            <ellipse class="cheek" cx="125" cy="83" rx="7.5" ry="5"/>
             <g class="eyes-closed">
-              <path class="eyeline" d="M80,75 Q88,66 96,75"/>
-              <path class="eyeline" d="M104,75 Q112,66 120,75"/>
+              <path class="eyeline" d="M79,75 Q87,67 95,75"/>
+              <path class="eyeline" d="M105,75 Q113,67 121,75"/>
             </g>
             <g class="eyes-open">
-              <ellipse class="pupil" cx="88" cy="72" rx="7" ry="9"/>
-              <ellipse class="pupil" cx="112" cy="72" rx="7" ry="9"/>
-              <circle class="glint" cx="85" cy="68" r="2.6"/>
-              <circle class="glint" cx="109" cy="68" r="2.6"/>
+              <ellipse class="eyewhite" cx="87" cy="74" rx="9.5" ry="12.5"/>
+              <ellipse class="eyewhite" cx="113" cy="74" rx="9.5" ry="12.5"/>
+              <ellipse class="iris" cx="87" cy="76" rx="7.5" ry="10"/>
+              <ellipse class="iris" cx="113" cy="76" rx="7.5" ry="10"/>
+              <ellipse class="pupil" cx="87" cy="78" rx="4.5" ry="7"/>
+              <ellipse class="pupil" cx="113" cy="78" rx="4.5" ry="7"/>
+              <circle class="glint" cx="83" cy="69" r="3.2"/>
+              <circle class="glint" cx="109" cy="69" r="3.2"/>
+              <circle class="glint2" cx="90" cy="80" r="1.7"/>
+              <circle class="glint2" cx="116" cy="80" r="1.7"/>
             </g>
             <path class="nose" d="M95,85 L105,85 L100,91 Z"/>
             <path class="mouth" d="M100,91 Q95,96 90,93 M100,91 Q105,96 110,93"/>
@@ -1975,8 +1996,8 @@ function catStageHTML(){
 function runCatShow(stage, lang){
   if(!stage) return;
   const moves = CAT_MOVES[lang] || CAT_MOVES.en;
-  const order = ["sit","walk","yawn","roll","chase","nap","hide"];
-  const dur = {sit:3200, walk:5000, yawn:3300, roll:3600, chase:5000, nap:5500, hide:4500};
+  const order = ["sit","yawn","roll","chase","nap","hide"];
+  const dur = {sit:3200, yawn:3300, roll:3600, chase:5000, nap:5500, hide:4500};
   const cat = stage.querySelector(".cat"), cap = stage.querySelector(".cat-cap");
   let i = 0;
   (function step(){
@@ -1991,6 +2012,7 @@ function runCatShow(stage, lang){
 
 /* ================= Screens ================= */
 function renderLangSelect(){
+  document.body.classList.add("skybg");
   app.innerHTML = `
     <div class="langselect">
       ${catStageHTML()}
@@ -2010,6 +2032,7 @@ function renderLangSelect(){
 }
 
 function renderHome(showWelcome){
+  document.body.classList.remove("skybg");
   const t = T(), U = units();
   // figure out the next unlocked lesson (linear path)
   let nextKey = null;

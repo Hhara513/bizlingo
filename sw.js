@@ -1,4 +1,4 @@
-const CACHE = "bizlingo-v6";
+const CACHE = "bizlingo-v7";
 const ASSETS = [
   "./",
   "./index.html",
